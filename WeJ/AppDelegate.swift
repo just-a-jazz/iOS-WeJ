@@ -30,8 +30,11 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     }
     
     func application(_ app: UIApplication, open url: URL, options: [UIApplicationOpenURLOptionsKey : Any] = [:]) -> Bool {
-        NotificationCenter.default.post(name: SpotifyConstants.spotifyPlayerDidLoginNotification, object: url)
-        return true
+        return SpotifyAuthorizationManager.handleAuthCallback(application: app, open: url, options: options)
+    }
+    
+    private func application(_ application: UIApplication, continue userActivity: NSUserActivity, restorationHandler: @escaping ([UIUserActivityRestoring]?) -> Void) -> Bool {
+        return SpotifyAuthorizationManager.handleUserActivity(application: application, userActivity: userActivity, restorationHandler: restorationHandler)
     }
     
     func applicationWillResignActive(_ application: UIApplication) {
@@ -110,4 +113,3 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     }
 
 }
-

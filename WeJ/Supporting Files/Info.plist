@@ -2,8 +2,6 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
-	<key></key>
-	<string></string>
 	<key>CFBundleDevelopmentRegion</key>
 	<string>en</string>
 	<key>CFBundleDisplayName</key>
@@ -27,20 +25,18 @@
 		<dict>
 			<key>CFBundleTypeRole</key>
 			<string>Editor</string>
-			<key>CFBundleURLSchemes</key>
-			<array>
-				<string>partyapp</string>
-			</array>
+            <key>CFBundleURLName</key>
+            <string>com.github.justajazz.wej</string>
+            <key>CFBundleURLSchemes</key>
+            <array>
+                <string>wej</string>
+            </array>
 		</dict>
 	</array>
 	<key>CFBundleVersion</key>
 	<string>1.0</string>
 	<key>LSApplicationCategoryType</key>
 	<string></string>
-	<key>LSApplicationQueriesSchemes</key>
-	<array>
-		<string>mxm-ext</string>
-	</array>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
 	<key>NSAppTransportSecurity</key>
@@ -52,6 +48,10 @@
 	<string>WeJ requires access to play Apple Music tracks and show you your library</string>
 	<key>NSBluetoothPeripheralUsageDescription</key>
 	<string>Nearby uses the microphone is used to find nearby devices</string>
+	<key>LSApplicationQueriesSchemes</key>
+    <array>
+      <string>spotify</string>
+    </array>
 	<key>NSHumanReadableCopyright</key>
 	<string>Copyright © 2017 Mohammad Ali Siddiqui. All rights reserved.</string>
 	<key>UIBackgroundModes</key>

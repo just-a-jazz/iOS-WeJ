@@ -98,7 +98,7 @@ class MusicLibrarySelectionViewController: UIViewController, ViewControllerAcces
     }
     
     private func setDelegates() {
-        delegate = navigationController?.tabBarController! as! AddTracksTabBarController
+        delegate = (navigationController?.tabBarController! as! AddTracksTabBarController)
         
         SpotifyAuthorizationManager.delegate = self
         AppleMusicAuthorizationManager.delegate = self
@@ -144,7 +144,7 @@ class MusicLibrarySelectionViewController: UIViewController, ViewControllerAcces
     
     @IBAction func showSpotifyLibrary() {
         guard !processingLogin else { return }
-        authorizationManager = SpotifyAuthorizationManager()
+        authorizationManager = SpotifyAuthorizationManager.shared
         libraryMusicService = .spotify
         authorizationManager.requestAuthorization()
     }

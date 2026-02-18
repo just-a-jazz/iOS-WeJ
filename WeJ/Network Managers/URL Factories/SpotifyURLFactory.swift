@@ -11,6 +11,7 @@ import Foundation
 struct SpotifyURLFactory {
 
     private static let baseSpotifyWebAPI = "api.spotify.com"
+    private static let baseSpotifyAccountsAPI = "accounts.spotify.com"
     
     static func createSearchRequest(forTerm term: String) -> URLRequest {
         let disallowedChars = CharacterSet(charactersIn: "()[],.!?")
@@ -161,6 +162,42 @@ struct SpotifyURLFactory {
         urlRequest.addValue("Bearer \(Party.cookie!)", forHTTPHeaderField: "Authorization")
         
         return urlRequest
+    }
+    
+    static func createWebAuthorizationURL(withScopes scopes: [String]) -> URL {
+        var urlComponents = URLComponents()
+        urlComponents.scheme = "https"
+        urlComponents.host = baseSpotifyAccountsAPI
+        urlComponents.path = "/authorize"
+        urlComponents.queryItems = [
+            URLQueryItem(name: "response_type", value: "code"),
+            URLQueryItem(name: "client_id", value: SpotifyConstants.clientID),
+            URLQueryItem(name: "redirect_uri", value: SpotifyConstants.redirectURL.absoluteString),
+            URLQueryItem(name: "scope", value: scopes.joined(separator: " "))
+        ]
+        
+        return urlComponents.url!
+    }
+    
+    static func createTokenSwapRequest(withCode code: String) -> URLRequest {
+        var request = URLRequest(url: SpotifyConstants.swapURL!)
+        request.httpMethod = "POST"
+        request.addValue("application/x-www-form-urlencoded", forHTTPHeaderField: "Content-Type")
+        
+        let redirectValue = SpotifyConstants.redirectURL.absoluteString
+        let body = "code=\(code)&redirect_uri=\(redirectValue)"
+        request.httpBody = body.data(using: .utf8)
+        
+        return request
+    }
+    
+    static func createTokenRefreshRequest(withRefreshToken refreshToken: String) -> URLRequest {
+        var request = URLRequest(url: SpotifyConstants.refreshURL!)
+        request.httpMethod = "POST"
+        request.addValue("application/x-www-form-urlencoded", forHTTPHeaderField: "Content-Type")
+        request.httpBody = "refresh_token=\(refreshToken)".data(using: .utf8)
+        
+        return request
     }
     
 }

@@ -3,7 +3,7 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 46;
+	objectVersion = 54;
 	objects = {
 
 /* Begin PBXBuildFile section */
@@ -64,19 +64,31 @@
 		41C1113F1F2A158500A33771 /* AppleMusicConstants.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41C1113E1F2A158500A33771 /* AppleMusicConstants.swift */; };
 		41F345A41F34BD05007A250B /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 41F345A31F34BD05007A250B /* Assets.xcassets */; };
 		99E05000123D800F309A600D /* Pods_WeJ.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FB7198514224E0BBDF2873C4 /* Pods_WeJ.framework */; };
-		FC1C8AAB20AE3BFE00793E82 /* PrivateConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = FC1C8AAA20AE3BFE00793E82 /* PrivateConfig.swift */; };
-		FC4BEDF420AE69B20004EC38 /* certificate.cer in Resources */ = {isa = PBXBuildFile; fileRef = FC4BEDF320AE69B20004EC38 /* certificate.cer */; };
-		FCC6128420C3790100F65E42 /* SpotifyAudioPlayback.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FCC6128220C3790100F65E42 /* SpotifyAudioPlayback.framework */; };
-		FCC6128520C3790100F65E42 /* SpotifyAuthentication.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FCC6128320C3790100F65E42 /* SpotifyAuthentication.framework */; };
+		FC5B37A42EFB281200DA9553 /* PrivateConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = FC5B37A32EFB280F00DA9553 /* PrivateConfig.swift */; };
+		FC5B37A72EFCF0F500DA9553 /* SpotifyiOS.xcframework in Frameworks */ = {isa = PBXBuildFile; fileRef = FC5B37A52EFCF0E500DA9553 /* SpotifyiOS.xcframework */; };
+		FC5B37A82EFCF0F500DA9553 /* SpotifyiOS.xcframework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = FC5B37A52EFCF0E500DA9553 /* SpotifyiOS.xcframework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		FCC6128720C3797400F65E42 /* MXMLyricsAction.m in Sources */ = {isa = PBXBuildFile; fileRef = 416551361F27D9D900FA33F5 /* MXMLyricsAction.m */; };
 /* End PBXBuildFile section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		FC5B37A92EFCF0F500DA9553 /* Embed Frameworks */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 10;
+			files = (
+				FC5B37A82EFCF0F500DA9553 /* SpotifyiOS.xcframework in Embed Frameworks */,
+			);
+			name = "Embed Frameworks";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
 		3472FB151DDAC81E00A35FCB /* Party.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = Party.swift; path = "Party Classes/Party.swift"; sourceTree = "<group>"; };
 		34D750DF1E32E9C5009AFD63 /* MultipeerManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = MultipeerManager.swift; path = "Network Managers/MultipeerManager.swift"; sourceTree = "<group>"; };
 		3EB77C24F7978848084888F9 /* Pods-WeJ.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-WeJ.debug.xcconfig"; path = "Pods/Target Support Files/Pods-WeJ/Pods-WeJ.debug.xcconfig"; sourceTree = "<group>"; };
 		41045F2A1E39ACBE00A29830 /* SpotifyAudioPlayback.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = SpotifyAudioPlayback.framework; sourceTree = "<group>"; };
-		41045F2B1E39ACBE00A29830 /* SpotifyAuthentication.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = SpotifyAuthentication.framework; sourceTree = "<group>"; };
 		41045F2E1E39AD6D00A29830 /* AVFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AVFoundation.framework; path = System/Library/Frameworks/AVFoundation.framework; sourceTree = SDKROOT; };
 		41045F301E39AD7E00A29830 /* SystemConfiguration.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SystemConfiguration.framework; path = System/Library/Frameworks/SystemConfiguration.framework; sourceTree = SDKROOT; };
 		41045F321E39B80300A29830 /* WeJ-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "WeJ-Bridging-Header.h"; sourceTree = SOURCE_ROOT; };
@@ -149,10 +161,9 @@
 		41F345A31F34BD05007A250B /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; name = Assets.xcassets; path = "Supporting Files/Assets.xcassets"; sourceTree = "<group>"; };
 		CB810334E004CAA30F9C84CE /* Pods-WeJ.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-WeJ.release.xcconfig"; path = "Pods/Target Support Files/Pods-WeJ/Pods-WeJ.release.xcconfig"; sourceTree = "<group>"; };
 		FB7198514224E0BBDF2873C4 /* Pods_WeJ.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_WeJ.framework; sourceTree = BUILT_PRODUCTS_DIR; };
-		FC1C8AAA20AE3BFE00793E82 /* PrivateConfig.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrivateConfig.swift; sourceTree = "<group>"; };
-		FC4BEDF320AE69B20004EC38 /* certificate.cer */ = {isa = PBXFileReference; lastKnownFileType = file; name = certificate.cer; path = "Supporting Files/certificate.cer"; sourceTree = "<group>"; };
+		FC5B37A32EFB280F00DA9553 /* PrivateConfig.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrivateConfig.swift; sourceTree = "<group>"; };
+		FC5B37A52EFCF0E500DA9553 /* SpotifyiOS.xcframework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcframework; path = SpotifyiOS.xcframework; sourceTree = "<group>"; };
 		FCC6128220C3790100F65E42 /* SpotifyAudioPlayback.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SpotifyAudioPlayback.framework; path = Frameworks/SpotifyAudioPlayback.framework; sourceTree = "<group>"; };
-		FCC6128320C3790100F65E42 /* SpotifyAuthentication.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SpotifyAuthentication.framework; path = Frameworks/SpotifyAuthentication.framework; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -160,14 +171,13 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				FCC6128420C3790100F65E42 /* SpotifyAudioPlayback.framework in Frameworks */,
-				FCC6128520C3790100F65E42 /* SpotifyAuthentication.framework in Frameworks */,
 				412F981F1F51906F0055A9FA /* RKNotificationHub.framework in Frameworks */,
 				41A279E91F28DE1700C218A2 /* SwiftyJSON.framework in Frameworks */,
 				412F98211F5190740055A9FA /* NVActivityIndicatorView.framework in Frameworks */,
 				41A279E81F28DE1700C218A2 /* Pods_WeJ.framework in Frameworks */,
 				41045F2F1E39AD6D00A29830 /* AVFoundation.framework in Frameworks */,
 				41045F311E39AD7E00A29830 /* SystemConfiguration.framework in Frameworks */,
+				FC5B37A72EFCF0F500DA9553 /* SpotifyiOS.xcframework in Frameworks */,
 				99E05000123D800F309A600D /* Pods_WeJ.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -354,11 +364,10 @@
 		419448001E3FFFDD00B9370C /* Supporting Files */ = {
 			isa = PBXGroup;
 			children = (
-				417C38DB1DDA43FD00F59926 /* Info.plist */,
 				4165512B1F279A5900FA33F5 /* BlankAudio.wav */,
-				FC4BEDF320AE69B20004EC38 /* certificate.cer */,
 				41F345A31F34BD05007A250B /* Assets.xcassets */,
 				414021131F5218F300B1CDAC /* Localizable.strings */,
+				417C38DB1DDA43FD00F59926 /* Info.plist */,
 			);
 			name = "Supporting Files";
 			sourceTree = "<group>";
@@ -381,7 +390,7 @@
 				41774CCB1F3B72BB00108470 /* AppConstants.swift */,
 				41C1113E1F2A158500A33771 /* AppleMusicConstants.swift */,
 				416E8C3E1F2A046E00F524E0 /* SpotifyConstants.swift */,
-				FC1C8AAA20AE3BFE00793E82 /* PrivateConfig.swift */,
+				FC5B37A32EFB280F00DA9553 /* PrivateConfig.swift */,
 			);
 			path = Constants;
 			sourceTree = "<group>";
@@ -399,7 +408,6 @@
 			isa = PBXGroup;
 			children = (
 				FCC6128220C3790100F65E42 /* SpotifyAudioPlayback.framework */,
-				FCC6128320C3790100F65E42 /* SpotifyAuthentication.framework */,
 				419C677B1F5216A3004C4948 /* LocalizationKit.framework */,
 				412F98201F5190740055A9FA /* NVActivityIndicatorView.framework */,
 				412F981E1F51906F0055A9FA /* RKNotificationHub.framework */,
@@ -412,8 +420,8 @@
 				41045F301E39AD7E00A29830 /* SystemConfiguration.framework */,
 				41045F2E1E39AD6D00A29830 /* AVFoundation.framework */,
 				41045F2A1E39ACBE00A29830 /* SpotifyAudioPlayback.framework */,
-				41045F2B1E39ACBE00A29830 /* SpotifyAuthentication.framework */,
 				FB7198514224E0BBDF2873C4 /* Pods_WeJ.framework */,
+				FC5B37A52EFCF0E500DA9553 /* SpotifyiOS.xcframework */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
@@ -432,6 +440,7 @@
 				9B811AFA3BCCAFF7F9ABDC42 /* [CP] Copy Pods Resources */,
 				412B70571F4B27CE00F3E613 /* Run Script */,
 				417C38C71DDA43FD00F59926 /* Resources */,
+				FC5B37A92EFCF0F500DA9553 /* Embed Frameworks */,
 			);
 			buildRules = (
 			);
@@ -454,7 +463,6 @@
 				TargetAttributes = {
 					417C38C81DDA43FD00F59926 = {
 						CreatedOnToolsVersion = 8.1;
-						DevelopmentTeam = Y3Y8M98F2M;
 						LastSwiftMigration = 0930;
 						ProvisioningStyle = Automatic;
 						SystemCapabilities = {
@@ -467,7 +475,7 @@
 			};
 			buildConfigurationList = 417C38C41DDA43FD00F59926 /* Build configuration list for PBXProject "WeJ" */;
 			compatibilityVersion = "Xcode 3.2";
-			developmentRegion = English;
+			developmentRegion = en;
 			hasScannedForEncodings = 0;
 			knownRegions = (
 				en,
@@ -494,7 +502,6 @@
 				4165512C1F279A5900FA33F5 /* BlankAudio.wav in Resources */,
 				417C38DA1DDA43FD00F59926 /* LaunchScreen.storyboard in Resources */,
 				414021181F521AC100B1CDAC /* Main.storyboard in Resources */,
-				FC4BEDF420AE69B20004EC38 /* certificate.cer in Resources */,
 				41F345A41F34BD05007A250B /* Assets.xcassets in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -589,8 +596,8 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				FC5B37A42EFB281200DA9553 /* PrivateConfig.swift in Sources */,
 				FCC6128720C3797400F65E42 /* MXMLyricsAction.m in Sources */,
-				FC1C8AAB20AE3BFE00793E82 /* PrivateConfig.swift in Sources */,
 				412F98181F4F731A0055A9FA /* PartiesListViewController.swift in Sources */,
 				41C0AEBE1E7A12E000C797F0 /* QueueViewController.swift in Sources */,
 				41C0AEB61E79512D00C797F0 /* searchTextField.swift in Sources */,
@@ -711,6 +718,7 @@
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				ENABLE_TESTABILITY = YES;
+				EXCLUDED_ARCHS = "";
 				GCC_C_LANGUAGE_STANDARD = gnu99;
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_NO_COMMON_BLOCKS = YES;
@@ -732,7 +740,8 @@
 				SDKROOT = iphoneos;
 				SKIP_INSTALL = NO;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
-				SWIFT_OPTIMIZATION_LEVEL = "-Owholemodule";
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
 			};
 			name = Debug;
 		};
@@ -772,6 +781,7 @@
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				ENABLE_NS_ASSERTIONS = NO;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				EXCLUDED_ARCHS = "";
 				GCC_C_LANGUAGE_STANDARD = gnu99;
 				GCC_NO_COMMON_BLOCKS = YES;
 				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
@@ -785,7 +795,8 @@
 				MTL_ENABLE_DEBUG_INFO = NO;
 				SDKROOT = iphoneos;
 				SKIP_INSTALL = NO;
-				SWIFT_OPTIMIZATION_LEVEL = "-Owholemodule";
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
 				VALIDATE_PRODUCT = YES;
 			};
 			name = Release;
@@ -794,10 +805,9 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = 3EB77C24F7978848084888F9 /* Pods-WeJ.debug.xcconfig */;
 			buildSettings = {
-				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = "$(inherited)";
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
-				DEVELOPMENT_TEAM = Y3Y8M98F2M;
+				DEVELOPMENT_TEAM = M88ZYQ7793;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(PROJECT_DIR)",
@@ -805,15 +815,19 @@
 				);
 				INFOPLIST_FILE = "WeJ/Supporting Files/Info.plist";
 				INSTALL_PATH = "$(LOCAL_APPS_DIR)";
-				IPHONEOS_DEPLOYMENT_TARGET = 10.0;
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
+				IPHONEOS_DEPLOYMENT_TARGET = 15.6;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
 				OTHER_LDFLAGS = (
 					"$(inherited)",
 					"-framework",
 					"\"SwiftyJSON\"",
 					"-ObjC",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = WeJ.alisidd.com.github;
+				PRODUCT_BUNDLE_IDENTIFIER = com.github.justajazz.wej;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_OBJC_BRIDGING_HEADER = "WeJ-Bridging-Header.h";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
@@ -828,10 +842,9 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = CB810334E004CAA30F9C84CE /* Pods-WeJ.release.xcconfig */;
 			buildSettings = {
-				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = "$(inherited)";
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
-				DEVELOPMENT_TEAM = Y3Y8M98F2M;
+				DEVELOPMENT_TEAM = M88ZYQ7793;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(PROJECT_DIR)",
@@ -839,15 +852,19 @@
 				);
 				INFOPLIST_FILE = "WeJ/Supporting Files/Info.plist";
 				INSTALL_PATH = "$(LOCAL_APPS_DIR)";
-				IPHONEOS_DEPLOYMENT_TARGET = 10.0;
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
+				IPHONEOS_DEPLOYMENT_TARGET = 15.6;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
 				OTHER_LDFLAGS = (
 					"$(inherited)",
 					"-framework",
 					"\"SwiftyJSON\"",
 					"-ObjC",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = WeJ.alisidd.com.github;
+				PRODUCT_BUNDLE_IDENTIFIER = com.github.justajazz.wej;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_OBJC_BRIDGING_HEADER = "WeJ-Bridging-Header.h";
 				SWIFT_SWIFT3_OBJC_INFERENCE = On;

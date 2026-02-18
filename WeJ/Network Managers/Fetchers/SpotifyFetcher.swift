@@ -14,6 +14,7 @@ class SpotifyFetcher: Fetcher {
     var tracksList = [Track]()
     
     private static var templateWebRequest: (URLRequest, @escaping (Data?, URLResponse?, Error?) -> Void) -> Void = { (request, completionHandler) in
+        SpotifyAuthorizationManager.ensureValidWebAccessToken()
         let task = URLSession.shared.dataTask(with: request) { (data, response, error) in
             if let statusCode = (response as? HTTPURLResponse)?.statusCode, statusCode == 200, data != nil {
                 completionHandler(data, response, error)
@@ -231,7 +232,7 @@ class SpotifyFetcher: Fetcher {
     
     func getMostPlayed(completionHandler: @escaping () -> Void) {
         DispatchQueue.global(qos: .userInitiated).async { [weak self] in
-            self?.getID(forCategoryID: "toplists") { (ownerID, playlistID) in
+            self?.getID { (ownerID, playlistID) in
                 let request = SpotifyURLFactory.createPlaylistsRequest(forOwnerID: ownerID, forPlaylistID: playlistID)
                 
                 SpotifyFetcher.templateWebRequest(request) {(data, response, _) in
@@ -246,16 +247,17 @@ class SpotifyFetcher: Fetcher {
         }
     }
     
-    private func getID(forCategoryID categoryID: String, completionHandler: @escaping (String, String) -> Void) {
-        let request = SpotifyURLFactory.createPlaylistsIDRequest(forCategoryID: categoryID)
+    private func getID(completionHandler: @escaping (String, String) -> Void) {
+        let request = SpotifyURLFactory.createTopPlayedTracksRequest()
         
         SpotifyFetcher.templateWebRequest(request) { (data, response, _) in
-            let playlistsJSON = try! JSON(data: data!)["playlists"]["items"].arrayValue
-            if let playlistJSON = playlistsJSON.first {
-                let ownerID = playlistJSON["owner"]["id"].stringValue
-                let playlistID = playlistJSON["id"].stringValue
-                completionHandler(ownerID, playlistID)
-            }
+            let trackItemsJSON = try! JSON(data: data!)["items"].arrayValue
+            print(trackItemsJSON)
+//            if let playlistJSON = playlistsJSON.first {
+//                let ownerID = playlistJSON["owner"]["id"].stringValue
+//                let playlistID = playlistJSON["id"].stringValue
+//                completionHandler(ownerID, playlistID)
+//            }
         }
     }
     
