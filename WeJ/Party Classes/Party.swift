@@ -34,7 +34,9 @@ class Party: NSObject, NSCoding {
     static var tracksFromMyself = [Track]()
     static var cookie: String? { // Represents Spotify access token or Apple Music country code
         didSet {
-            delegate?.hubAndQueueVC?.showAddButton()
+            DispatchQueue.main.async {
+                delegate?.hubAndQueueVC?.showAddButton()
+            }
         }
     }
     

@@ -6,145 +6,289 @@
 //  Copyright © 2017 Mohammad Ali Siddiqui. All rights reserved.
 //
 
-import Foundation
-import SafariServices
-import SwiftyJSON
+import UIKit
+import AuthenticationServices
+import SpotifyiOS
 
-class SpotifyAuthorizationManager: NSObject, AuthorizationManager, SPTAudioStreamingDelegate {
+class SpotifyAuthorizationManager: NSObject, AuthorizationManager, SPTSessionManagerDelegate {
     
     static weak var delegate: ViewControllerAccessDelegate?
-    
-    private static var authViewController: SFSafariViewController!
-    private static let updateSession: (Error?, SPTSession?) -> Void = { (error, session) in
-        guard error == nil else {
-            if (error! as NSError).code == -1009 {
-                postAlertForInternet()
-            }
-            delegate?.processingLogin = false
-            return
-        }
-        getAuth().session = session!
-        loginToPlayer(withAccessToken: session!.accessToken)
-    }
     static var storyboardSegue: String!
-    private static var isLoggedIn = false
+    
+    static let shared = SpotifyAuthorizationManager()
+    
+    private let configuration: SPTConfiguration
+    private let sessionManager: SPTSessionManager
+    private let webAuthScopes = ["user-library-read", "playlist-read-private", "streaming", "user-top-read"]
+    private let spotifyAuthSession: URLSession
+    
+    private static let webAccessTokenDefaultsKey = "spotifyWebAccessToken"
+    private static let webRefreshTokenDefaultsKey = "spotifyWebRefreshToken"
+    private static let webTokenExpiryDefaultsKey = "spotifyWebTokenExpiry"
+    
+    private var webAuthenticationSession: ASWebAuthenticationSession?
+    private var isWebAuthInProgress = false
     
     override init() {
+        let configuration = SPTConfiguration(clientID: SpotifyConstants.clientID, redirectURL: SpotifyConstants.redirectURL)
+        configuration.tokenSwapURL = SpotifyConstants.swapURL
+        configuration.tokenRefreshURL = SpotifyConstants.refreshURL
+        self.configuration = configuration
+        self.sessionManager = SPTSessionManager(configuration: configuration, delegate: nil)
+        
+        let urlSessionConfiguration = URLSessionConfiguration.default
+        urlSessionConfiguration.waitsForConnectivity = true
+        self.spotifyAuthSession = URLSession(configuration: urlSessionConfiguration)
+        
         super.init()
-        SPTAudioStreamingController.sharedInstance().delegate = self
+        
+        self.sessionManager.delegate = self
     }
     
     // MARK: - Authorization
     
-    static func getAuth() -> SPTAuth {
-        let auth = SPTAuth.defaultInstance()
-        auth?.clientID = SpotifyConstants.clientID
-        
-        auth?.redirectURL = SpotifyConstants.redirectURL
-        auth?.tokenSwapURL = SpotifyConstants.swapURL
-        auth?.tokenRefreshURL = SpotifyConstants.refreshURL
-        auth?.requestedScopes = [SPTAuthStreamingScope, SPTAuthPlaylistReadPrivateScope, SPTAuthUserLibraryReadScope]
-        auth?.sessionUserDefaultsKey = "local session"
-        
-        return auth!
-    }
-    
     func requestAuthorization() {
-        let auth = SpotifyAuthorizationManager.getAuth()
-        try? SPTAudioStreamingController.sharedInstance().start(withClientId: auth.clientID)
+        SpotifyAuthorizationManager.delegate?.processingLogin = true
         
-        DispatchQueue.main.async {
-            SpotifyAuthorizationManager.startAuthenticationFlow(usingAuth: auth)
-        }
-    }
-    
-    private static func startAuthenticationFlow(usingAuth auth: SPTAuth, doRenew: Bool = false) {
-        if auth.session == nil {
-            promptLoginScreen(usingAuth: auth)
-        } else if auth.session.isValid() && !doRenew {
-            login(usingSession: auth.session)
-        } else {
-            renew(usingAuth: auth)
-        }
-    }
-    
-    private static func promptLoginScreen(usingAuth auth: SPTAuth) {
-        let authURL = auth.spotifyWebAuthenticationURL()
-        
-        authViewController = SFSafariViewController(url: authURL!)
-        delegate?.present(authViewController, animated: true, completion: nil)
-        
-        NotificationCenter.default.removeObserver(self)
-        NotificationCenter.default.addObserver(self, selector: #selector(createSession(withNotification:)), name: SpotifyConstants.spotifyPlayerDidLoginNotification, object: nil)
-    }
-    
-    private static func login(usingSession session: SPTSession) {
-        delegate?.processingLogin = true
-        loginToPlayer(withAccessToken: session.accessToken)
-    }
-    
-    private static func renew(usingAuth auth: SPTAuth) {
-        delegate?.processingLogin = true
-        auth.renewSession(auth.session, callback: updateSession)
-    }
-    
-    private static func loginToPlayer(withAccessToken accessToken: String) {
-        if Party.musicService == .spotify {
-            if Party.cookie == nil {
-                SPTAudioStreamingController.sharedInstance().login(withAccessToken: accessToken)
-            } else {
-                Party.cookie = accessToken
-                completeAuthorization()
-            }
-        } else {
+        if let token = loadStoredValidWebAccessToken() {
+            Party.cookie = token
             completeAuthorization()
+            finishProcessingLogin()
+            return
         }
-    }
-    
-    private static func completeAuthorization() {
-        DispatchQueue.main.async {
-            delegate?.performSegue(withIdentifier: storyboardSegue, sender: nil)
-        }
-        delegate?.processingLogin = false
-    }
-    
-    // MARK: - Callbacks
-    
-    @objc static func createSession(withNotification notification: NSNotification) {
-        let url = notification.object as! URL
-        let auth = getAuth()
         
-        if auth.canHandle(url) {
-            authViewController.dismiss(animated: true, completion: nil)
-            delegate?.processingLogin = true
-            auth.handleAuthCallback(withTriggeredAuthURL: url, callback: updateSession)
+        if let refreshToken = loadStoredWebRefreshToken() {
+            refreshWebAccessToken(refreshToken)
+            return
         }
+        
+        requestWebAuthorization()
     }
     
-    func audioStreamingDidLogin(_ audioStreaming: SPTAudioStreamingController!) {
-        SpotifyAuthorizationManager.isLoggedIn = true
-        Party.cookie = SpotifyAuthorizationManager.getAuth().session.accessToken
+    // MARK: - App Delegate Callbacks
+    
+    static func handleAuthCallback(application: UIApplication, open url: URL, options: [UIApplicationOpenURLOptionsKey : Any]) -> Bool {
+        let manager = shared
+        if manager.handleWebAuthCallback(url) {
+            return true
+        }
+        return manager.sessionManager.application(application, open: url, options: options)
+    }
+    
+    static func handleUserActivity(application: UIApplication, userActivity: NSUserActivity, restorationHandler: @escaping ([UIUserActivityRestoring]?) -> Void) -> Bool {
+        return shared.sessionManager.application(application, continue: userActivity, restorationHandler: restorationHandler)
+    }
+    
+    // MARK: - SPTSessionManagerDelegate
+    
+    func sessionManager(manager: SPTSessionManager, didInitiate session: SPTSession) {
+        finishProcessingLogin()
+    }
+    
+    func sessionManager(manager: SPTSessionManager, didFailWith error: Error) {
+        handleAuthorizationFailure(error)
+    }
+    
+    func sessionManager(manager: SPTSessionManager, didRenew session: SPTSession) {
+        finishProcessingLogin()
+    }
+    
+    func sessionManager(manager: SPTSessionManager, shouldRequestAccessTokenWith authorizationCode: String) -> Bool {
+        return true
+    }
+    
+    // MARK: - Completion
+    
+    private func completeAuthorization() {
         DispatchQueue.main.async {
-            guard SpotifyAuthorizationManager.delegate != nil else { return }
-            if Party.cookie != nil && SpotifyAuthorizationManager.delegate!.processingLogin {
-                SpotifyAuthorizationManager.delegate?.processingLogin = false
-                SpotifyAuthorizationManager.delegate?.performSegue(withIdentifier: SpotifyAuthorizationManager.storyboardSegue, sender: nil)
-            }
+            SpotifyAuthorizationManager.delegate?.performSegue(withIdentifier: SpotifyAuthorizationManager.storyboardSegue, sender: nil)
         }
     }
     
-    func audioStreamingDidEncounterTemporaryConnectionError(_ audioStreaming: SPTAudioStreamingController!) {
-        SpotifyAuthorizationManager.postAlertForInternet()
-        SPTAudioStreamingController.sharedInstance().logout()
-        SpotifyAuthorizationManager.delegate?.processingLogin = false
-    }
-    
-    func audioStreaming(_ audioStreaming: SPTAudioStreamingController!, didReceiveError error: Error!) {
-        if (error! as NSError).code == 9 {
+    private func handleAuthorizationFailure(_ error: Error) {
+        let nsError = error as NSError
+        if nsError.code == NSURLErrorNotConnectedToInternet {
+            SpotifyAuthorizationManager.postAlertForInternet()
+        } else if nsError.code == 9 {
             SpotifyAuthorizationManager.postAlertForSpotifyPremium()
-            SpotifyAuthorizationManager.getAuth().session = nil
+            sessionManager.session = nil
         }
-        SpotifyAuthorizationManager.delegate?.processingLogin = false
+        
+        finishProcessingLogin()
+    }
+    
+    private func finishProcessingLogin() {
+        DispatchQueue.main.async {
+            SpotifyAuthorizationManager.delegate?.processingLogin = false
+        }
+    }
+    
+    // MARK: - Web Authorization
+    
+    private func requestWebAuthorization() {
+        isWebAuthInProgress = true
+        
+        let authURL = SpotifyURLFactory.createWebAuthorizationURL(withScopes: webAuthScopes)
+        let callbackScheme = SpotifyConstants.redirectURL.scheme
+        let session = ASWebAuthenticationSession(url: authURL, callbackURLScheme: callbackScheme) { [weak self] url, error in
+            self?.handleWebAuthCallback(url!, error: error)
+        }
+        session.presentationContextProvider = self
+        self.webAuthenticationSession = session
+        session.start()
+    }
+    
+    private func handleWebAuthCallback(_ url: URL, error: Error? = nil) {
+        isWebAuthInProgress = false
+        
+        if let error = error as NSError? {
+            if error.code == NSURLErrorNotConnectedToInternet {
+                SpotifyAuthorizationManager.postAlertForInternet()
+            }
+            finishProcessingLogin()
+            return
+        }
+        
+        guard let components = URLComponents(url: url, resolvingAgainstBaseURL: false) else {
+            finishProcessingLogin()
+            return
+        }
+        
+        let queryItems = components.queryItems ?? []
+        if let _ = queryItems.first(where: { $0.name == "error" })?.value {
+            finishProcessingLogin()
+            return
+        }
+        
+        guard let code = queryItems.first(where: { $0.name == "code" })?.value else {
+            finishProcessingLogin()
+            return
+        }
+        
+        exchangeCodeForWebAccessToken(code)
+    }
+    
+    private func handleWebAuthCallback(_ url: URL) -> Bool {
+        guard isWebAuthInProgress, url.scheme == SpotifyConstants.redirectURL.scheme else { return false }
+        handleWebAuthCallback(url, error: nil)
+        return true
+    }
+    
+    private func exchangeCodeForWebAccessToken(_ code: String) {
+        let request = SpotifyURLFactory.createTokenSwapRequest(withCode: code)
+        
+        spotifyAuthSession.dataTask(with: request) { [weak self] data, _, error in
+            self?.handleTokenResponse(data: data, error: error)
+        }.resume()
+    }
+    
+    private func refreshWebAccessToken(_ refreshToken: String) {
+        let request = SpotifyURLFactory.createTokenRefreshRequest(withRefreshToken: refreshToken)
+        
+        spotifyAuthSession.dataTask(with: request) { [weak self] data, _, error in
+            self?.handleTokenResponse(data: data, error: error, fallbackRefreshToken: refreshToken)
+        }.resume()
+    }
+    
+    private func handleTokenResponse(data: Data?, error: Error?, fallbackRefreshToken: String? = nil) {
+        guard let tokenResponse = processTokenResponse(data: data, error: error, fallbackRefreshToken: fallbackRefreshToken, notifyOnError: true) else {
+            finishProcessingLogin()
+            return
+        }
+        
+        updateStoredTokens(with: tokenResponse)
+        completeAuthorization()
+        finishProcessingLogin()
+    }
+    
+    static func ensureValidWebAccessToken() {
+        let manager = shared
+        if let token = manager.loadStoredValidWebAccessToken() {
+            Party.cookie = token
+            return
+        }
+        
+        guard let refreshToken = manager.loadStoredWebRefreshToken() else { return }
+        manager.refreshWebAccessTokenSync(refreshToken)
+    }
+    
+    private func refreshWebAccessTokenSync(_ refreshToken: String) {
+        let request = SpotifyURLFactory.createTokenRefreshRequest(withRefreshToken: refreshToken)
+        
+        let dispatchGroup = DispatchGroup()
+        dispatchGroup.enter()
+        
+        var tokenResponse: WebTokenResponse?
+        spotifyAuthSession.dataTask(with: request) { [weak self] data, _, error in
+            tokenResponse = self?.processTokenResponse(data: data, error: error, fallbackRefreshToken: refreshToken, notifyOnError: false)
+            dispatchGroup.leave()
+        }.resume()
+        
+        dispatchGroup.wait()
+        
+        guard let response = tokenResponse else { return }
+        updateStoredTokens(with: response)
+    }
+    
+    private struct WebTokenResponse {
+        let accessToken: String
+        let refreshToken: String?
+        let expiresIn: Double
+    }
+    
+    private func processTokenResponse(data: Data?, error: Error?, fallbackRefreshToken: String?, notifyOnError: Bool) -> WebTokenResponse? {
+        if let error = error as NSError? {
+            SpotifyAuthorizationManager.postAlertForInternet()
+            return nil
+        }
+        
+        guard let data = data else { return nil }
+        return parseWebTokenResponse(data: data, fallbackRefreshToken: fallbackRefreshToken)
+    }
+    
+    private func parseWebTokenResponse(data: Data, fallbackRefreshToken: String?) -> WebTokenResponse? {
+        let json = (try? JSONSerialization.jsonObject(with: data)) as? [String: Any]
+        guard let json = (try? JSONSerialization.jsonObject(with: data)) as? [String: Any],
+              let accessToken = json["access_token"] as? String,
+              let expiresIn = json["expires_in"] as? Double else {
+            return nil
+        }
+        
+        let refreshToken = (json["refresh_token"] as? String) ?? fallbackRefreshToken
+        return WebTokenResponse(accessToken: accessToken, refreshToken: refreshToken, expiresIn: expiresIn)
+    }
+    
+    // MARK: - Storage
+    
+    private func updateStoredTokens(with response: WebTokenResponse) {
+        storeWebTokens(accessToken: response.accessToken, refreshToken: response.refreshToken, expiresIn: response.expiresIn)
+        Party.cookie = response.accessToken
+    }
+    
+    private func storeWebTokens(accessToken: String, refreshToken: String?, expiresIn: Double) {
+        let expiryDate = Date.now.addingTimeInterval(expiresIn - 60)
+        let defaults = UserDefaults.standard
+        defaults.set(accessToken, forKey: SpotifyAuthorizationManager.webAccessTokenDefaultsKey)
+        defaults.set(expiryDate, forKey: SpotifyAuthorizationManager.webTokenExpiryDefaultsKey)
+        if let refreshToken = refreshToken {
+            defaults.set(refreshToken, forKey: SpotifyAuthorizationManager.webRefreshTokenDefaultsKey)
+        }
+        defaults.synchronize()
+    }
+    
+    private func loadStoredValidWebAccessToken() -> String? {
+        let defaults = UserDefaults.standard
+        guard let token = defaults.string(forKey: SpotifyAuthorizationManager.webAccessTokenDefaultsKey),
+              let expiryDate = defaults.object(forKey: SpotifyAuthorizationManager.webTokenExpiryDefaultsKey) as? Date,
+              expiryDate > Date.now else {
+            return nil
+        }
+        
+        return token
+    }
+    
+    private func loadStoredWebRefreshToken() -> String? {
+        return UserDefaults.standard.string(forKey: SpotifyAuthorizationManager.webRefreshTokenDefaultsKey)
     }
     
     // MARK: - Alerts
@@ -168,4 +312,13 @@ class SpotifyAuthorizationManager: NSObject, AuthorizationManager, SPTAudioStrea
         delegate?.present(alert, animated: true, completion: nil)
     }
     
+}
+
+extension SpotifyAuthorizationManager: ASWebAuthenticationPresentationContextProviding {
+    func presentationAnchor(for session: ASWebAuthenticationSession) -> ASPresentationAnchor {
+        let scene = UIApplication.shared.connectedScenes
+            .compactMap { $0 as? UIWindowScene }
+            .first { $0.activationState == .foregroundActive }
+        return scene?.windows.first(where: { $0.isKeyWindow }) ?? ASPresentationAnchor()
+    }
 }
