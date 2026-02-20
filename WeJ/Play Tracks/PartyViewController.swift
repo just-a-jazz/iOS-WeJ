@@ -104,6 +104,7 @@ class PartyViewController: UIViewController, MusicPlayerDelegate, UpdatePartyDel
     var isHost = true
     var personalQueue = Set<Track>()
     var cache = [String: Track]()
+    private var lastQueueAdvanceAt: Date?
     
     // MARK: - Lifecycle
     
@@ -205,6 +206,12 @@ class PartyViewController: UIViewController, MusicPlayerDelegate, UpdatePartyDel
         guard isHost,
               !Party.tracksQueue.isEmpty,
               let currentURI = musicPlayer.currentTrackURI else {
+            return
+        }
+        
+        // Prevent double-advance when a manual skip triggers a near-immediate sync.
+        if let lastAdvance = lastQueueAdvanceAt,
+           Date.now.timeIntervalSince(lastAdvance) < 1.0 {
             return
         }
 
@@ -490,6 +497,7 @@ class PartyViewController: UIViewController, MusicPlayerDelegate, UpdatePartyDel
         if !Party.tracksQueue.isEmpty {
             sendTracksToPeers(forTracks: [Party.tracksQueue.removeFirst()], toRemove: true)
             musicPlayer.startPlayer()
+            lastQueueAdvanceAt = Date.now
         }
     }
     
@@ -499,6 +507,7 @@ class PartyViewController: UIViewController, MusicPlayerDelegate, UpdatePartyDel
         if musicPlayer.isSafeToPlayNextTrack || force {
             sendTracksToPeers(forTracks: [Party.tracksQueue.removeFirst()], toRemove: true)
             musicPlayer.startPlayer()
+            lastQueueAdvanceAt = Date.now
         }
     }
     
