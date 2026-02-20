@@ -67,6 +67,7 @@
 		FC5B37A42EFB281200DA9553 /* PrivateConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = FC5B37A32EFB280F00DA9553 /* PrivateConfig.swift */; };
 		FC5B37A72EFCF0F500DA9553 /* SpotifyiOS.xcframework in Frameworks */ = {isa = PBXBuildFile; fileRef = FC5B37A52EFCF0E500DA9553 /* SpotifyiOS.xcframework */; };
 		FC5B37A82EFCF0F500DA9553 /* SpotifyiOS.xcframework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = FC5B37A52EFCF0E500DA9553 /* SpotifyiOS.xcframework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		FC5B37ED2F4850B500DA9553 /* SelectionCountBadgePresenting.swift in Sources */ = {isa = PBXBuildFile; fileRef = FC5B37EC2F4850B500DA9553 /* SelectionCountBadgePresenting.swift */; };
 		FCC6128720C3797400F65E42 /* MXMLyricsAction.m in Sources */ = {isa = PBXBuildFile; fileRef = 416551361F27D9D900FA33F5 /* MXMLyricsAction.m */; };
 /* End PBXBuildFile section */
 
@@ -88,7 +89,6 @@
 		3472FB151DDAC81E00A35FCB /* Party.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = Party.swift; path = "Party Classes/Party.swift"; sourceTree = "<group>"; };
 		34D750DF1E32E9C5009AFD63 /* MultipeerManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = MultipeerManager.swift; path = "Network Managers/MultipeerManager.swift"; sourceTree = "<group>"; };
 		3EB77C24F7978848084888F9 /* Pods-WeJ.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-WeJ.debug.xcconfig"; path = "Pods/Target Support Files/Pods-WeJ/Pods-WeJ.debug.xcconfig"; sourceTree = "<group>"; };
-		41045F2A1E39ACBE00A29830 /* SpotifyAudioPlayback.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = SpotifyAudioPlayback.framework; sourceTree = "<group>"; };
 		41045F2E1E39AD6D00A29830 /* AVFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AVFoundation.framework; path = System/Library/Frameworks/AVFoundation.framework; sourceTree = SDKROOT; };
 		41045F301E39AD7E00A29830 /* SystemConfiguration.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SystemConfiguration.framework; path = System/Library/Frameworks/SystemConfiguration.framework; sourceTree = SDKROOT; };
 		41045F321E39B80300A29830 /* WeJ-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "WeJ-Bridging-Header.h"; sourceTree = SOURCE_ROOT; };
@@ -163,7 +163,7 @@
 		FB7198514224E0BBDF2873C4 /* Pods_WeJ.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_WeJ.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		FC5B37A32EFB280F00DA9553 /* PrivateConfig.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrivateConfig.swift; sourceTree = "<group>"; };
 		FC5B37A52EFCF0E500DA9553 /* SpotifyiOS.xcframework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcframework; path = SpotifyiOS.xcframework; sourceTree = "<group>"; };
-		FCC6128220C3790100F65E42 /* SpotifyAudioPlayback.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SpotifyAudioPlayback.framework; path = Frameworks/SpotifyAudioPlayback.framework; sourceTree = "<group>"; };
+		FC5B37EC2F4850B500DA9553 /* SelectionCountBadgePresenting.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SelectionCountBadgePresenting.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -380,6 +380,7 @@
 				4113CFE81F362420000628B1 /* Automation.swift */,
 				411688741F2A69EB00C3CD4A /* PartyConnection.swift */,
 				4138C3461F541CE500F9554A /* SEFont.swift */,
+				FC5B37EC2F4850B500DA9553 /* SelectionCountBadgePresenting.swift */,
 			);
 			name = Extensions;
 			sourceTree = "<group>";
@@ -407,7 +408,6 @@
 		B2F645F37144B3727E5025EE /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
-				FCC6128220C3790100F65E42 /* SpotifyAudioPlayback.framework */,
 				419C677B1F5216A3004C4948 /* LocalizationKit.framework */,
 				412F98201F5190740055A9FA /* NVActivityIndicatorView.framework */,
 				412F981E1F51906F0055A9FA /* RKNotificationHub.framework */,
@@ -419,7 +419,6 @@
 				41A279E41F28DE1700C218A2 /* SwiftyJSON.framework */,
 				41045F301E39AD7E00A29830 /* SystemConfiguration.framework */,
 				41045F2E1E39AD6D00A29830 /* AVFoundation.framework */,
-				41045F2A1E39ACBE00A29830 /* SpotifyAudioPlayback.framework */,
 				FB7198514224E0BBDF2873C4 /* Pods_WeJ.framework */,
 				FC5B37A52EFCF0E500DA9553 /* SpotifyiOS.xcframework */,
 			);
@@ -603,6 +602,7 @@
 				41C0AEB61E79512D00C797F0 /* searchTextField.swift in Sources */,
 				413533291E8DE4C600BE5B0F /* MusicService.swift in Sources */,
 				416551301F279EAC00FA33F5 /* BackgroundTask.swift in Sources */,
+				FC5B37ED2F4850B500DA9553 /* SelectionCountBadgePresenting.swift in Sources */,
 				41774CCC1F3B72BB00108470 /* AppConstants.swift in Sources */,
 				4113CFE71F36163F000628B1 /* partyNameTextField.swift in Sources */,
 				412FBED11E32CFA7007FFB6A /* MusicPlayer.swift in Sources */,
