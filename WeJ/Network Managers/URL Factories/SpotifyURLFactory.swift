@@ -63,7 +63,7 @@ struct SpotifyURLFactory {
         urlComponents.queryItems = queryItems
         
         var urlRequest = URLRequest(url: urlComponents.url!)
-        urlRequest.addValue("Bearer \(SpotifyAuthorizationManager.getAuth().session.accessToken!)", forHTTPHeaderField: "Authorization")
+        urlRequest.addValue("Bearer \(Party.cookie!)", forHTTPHeaderField: "Authorization")
         
         return urlRequest
     }
@@ -83,28 +83,16 @@ struct SpotifyURLFactory {
         urlComponents.queryItems = queryItems
         
         var urlRequest = URLRequest(url: urlComponents.url!)
-        urlRequest.addValue("Bearer \(SpotifyAuthorizationManager.getAuth().session.accessToken!)", forHTTPHeaderField: "Authorization")
+        urlRequest.addValue("Bearer \(Party.cookie!)", forHTTPHeaderField: "Authorization")
         
         return urlRequest
     }
     
-    static func createLibraryPlaylistsRequest() -> URLRequest {
+    static func createLibraryPlaylistsRequest(atOffset offset: Int) -> URLRequest {
         var urlComponents = URLComponents()
         urlComponents.scheme = "https"
         urlComponents.host = baseSpotifyWebAPI
         urlComponents.path = "/v1/me/playlists"
-        
-        var urlRequest = URLRequest(url: urlComponents.url!)
-        urlRequest.addValue("Bearer \(SpotifyAuthorizationManager.getAuth().session.accessToken!)", forHTTPHeaderField: "Authorization")
-        
-        return urlRequest
-    }
-    
-    static func createLibraryPlaylistTracksRequest(atOffset offset: Int, forOwnerID ownerID: String, forPlaylistID playlistID: String) -> URLRequest {
-        var urlComponents = URLComponents()
-        urlComponents.scheme = "https"
-        urlComponents.host = baseSpotifyWebAPI
-        urlComponents.path = "/v1/users/\(ownerID)/playlists/\(playlistID)/tracks"
         
         let urlParameters = ["limit": "50",
                              "offset": String(offset)]
@@ -115,7 +103,27 @@ struct SpotifyURLFactory {
         urlComponents.queryItems = queryItems
         
         var urlRequest = URLRequest(url: urlComponents.url!)
-        urlRequest.addValue("Bearer \(SpotifyAuthorizationManager.getAuth().session.accessToken!)", forHTTPHeaderField: "Authorization")
+        urlRequest.addValue("Bearer \(Party.cookie!)", forHTTPHeaderField: "Authorization")
+        
+        return urlRequest
+    }
+    
+    static func createLibraryPlaylistTracksRequest(atOffset offset: Int, forPlaylistID playlistID: String) -> URLRequest {
+        var urlComponents = URLComponents()
+        urlComponents.scheme = "https"
+        urlComponents.host = baseSpotifyWebAPI
+        urlComponents.path = "/v1/playlists/\(playlistID)/items"
+        
+        let urlParameters = ["limit": "50",
+                             "offset": String(offset)]
+        var queryItems = [URLQueryItem]()
+        for (key, value) in urlParameters {
+            queryItems.append(URLQueryItem(name: key, value: value))
+        }
+        urlComponents.queryItems = queryItems
+        
+        var urlRequest = URLRequest(url: urlComponents.url!)
+        urlRequest.addValue("Bearer \(Party.cookie!)", forHTTPHeaderField: "Authorization")
         
         return urlRequest
     }
@@ -135,7 +143,7 @@ struct SpotifyURLFactory {
         urlComponents.queryItems = queryItems
         
         var urlRequest = URLRequest(url: urlComponents.url!)
-        urlRequest.addValue("Bearer \(SpotifyAuthorizationManager.getAuth().session.accessToken!)", forHTTPHeaderField: "Authorization")
+        urlRequest.addValue("Bearer \(Party.cookie!)", forHTTPHeaderField: "Authorization")
         
         return urlRequest
     }
@@ -152,11 +160,19 @@ struct SpotifyURLFactory {
         return urlRequest
     }
     
-    static func createPlaylistsIDRequest(forCategoryID categoryID: String) -> URLRequest {
+    static func createTopPlayedTracksRequest(limit: Int, offset: Int) -> URLRequest {
         var urlComponents = URLComponents()
         urlComponents.scheme = "https"
         urlComponents.host = baseSpotifyWebAPI
-        urlComponents.path = "/v1/browse/categories/\(categoryID)/playlists"
+        urlComponents.path = "/v1/me/top/tracks"
+        
+        let urlParameters = ["limit": String(limit),
+                             "offset": String(offset)]
+        var queryItems = [URLQueryItem]()
+        for (key, value) in urlParameters {
+            queryItems.append(URLQueryItem(name: key, value: value))
+        }
+        urlComponents.queryItems = queryItems
         
         var urlRequest = URLRequest(url: urlComponents.url!)
         urlRequest.addValue("Bearer \(Party.cookie!)", forHTTPHeaderField: "Authorization")

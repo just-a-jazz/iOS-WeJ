@@ -31,6 +31,11 @@ class MusicLibrarySelectionViewController: UIViewController, ViewControllerAcces
 
     private var libraryMusicService: MusicService!
     private var authorizationManager: AuthorizationManager!
+    private var isLoadingMostPlayed = false
+    private var hasMoreMostPlayed = true
+    private var mostPlayedOffset = 0
+    private let mostPlayedPageSize = 50
+    private let mostPlayedMaxTracks = 200
     var processingLogin = false {
         didSet {
             DispatchQueue.main.async {
@@ -95,6 +100,7 @@ class MusicLibrarySelectionViewController: UIViewController, ViewControllerAcces
     private func initializeVariables() {
         SpotifyAuthorizationManager.storyboardSegue = "Show Spotify Library"
         AppleMusicAuthorizationManager.storyboardSegue = "Show Apple Music Library"
+        configureMostPlayedConstraints()
     }
     
     private func setDelegates() {
@@ -109,6 +115,19 @@ class MusicLibrarySelectionViewController: UIViewController, ViewControllerAcces
     private func adjustViews() {
         tracksTableView.contentInset = UIEdgeInsets(top: 0, left: 0, bottom: 50, right: 0)
     }
+
+    private var mostPlayedTopConstraint: NSLayoutConstraint?
+    private var doneButtonTopConstraint: NSLayoutConstraint?
+
+    private func configureMostPlayedConstraints() {
+        mostPlayedTopConstraint = view.constraints.first {
+            ($0.firstItem as? UIButton) == playlistsButton && $0.firstAttribute == .top
+        }
+        doneButtonTopConstraint = view.constraints.first {
+            ($0.firstItem as? UIButton) == doneButton && $0.firstAttribute == .top
+        }
+        doneButtonTopConstraint?.priority = .required
+    }
     
     private func adjustFontSizes() {
         if UIDevice.deviceType == .iPhone4_4s || UIDevice.deviceType == .iPhone5_5s_SE {
@@ -122,10 +141,7 @@ class MusicLibrarySelectionViewController: UIViewController, ViewControllerAcces
     
     private func getTrending() {
         playlistsActivityIndicator.startAnimating()
-        
-        fetcher.getMostPlayed { [weak self] in
-            self?.tracksList = self?.fetcher.tracksList ?? []
-        }
+        loadMostPlayed(reset: true)
     }
     
     private func fetchArtworkForRestOfTracks() {
@@ -137,6 +153,36 @@ class MusicLibrarySelectionViewController: UIViewController, ViewControllerAcces
                     self?.tracksTableView.reloadData()
                 }
             }
+        }
+    }
+    
+    func loadMoreMostPlayedIfNeeded() {
+        guard libraryMusicService == .spotify else { return }
+        guard !isLoadingMostPlayed, hasMoreMostPlayed else { return }
+        loadMostPlayed(reset: false)
+    }
+    
+    private func loadMostPlayed(reset: Bool) {
+        guard let fetcher = fetcher as? SpotifyFetcher else { return }
+        if reset {
+            fetcher.tracksList.removeAll()
+            tracksList.removeAll()
+            mostPlayedOffset = 0
+            hasMoreMostPlayed = true
+        }
+        
+        guard hasMoreMostPlayed, tracksList.count < mostPlayedMaxTracks else { return }
+        
+        isLoadingMostPlayed = true
+        let remaining = mostPlayedMaxTracks - tracksList.count
+        let limit = min(mostPlayedPageSize, remaining)
+        
+        fetcher.getMostPlayed(atOffset: mostPlayedOffset, limit: limit) { [weak self] newCount in
+            guard let self = self else { return }
+            self.mostPlayedOffset += newCount
+            self.hasMoreMostPlayed = newCount == limit
+            self.tracksList = fetcher.tracksList
+            self.isLoadingMostPlayed = false
         }
     }
 

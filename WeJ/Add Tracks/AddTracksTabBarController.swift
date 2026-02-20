@@ -13,13 +13,11 @@ class AddTracksTabBarController: UITabBarController, UITabBarControllerDelegate,
     
     var myHubController: MusicLibrarySelectionViewController!
     
-    fileprivate let minHeight: CGFloat = 310
+    fileprivate let minHeight: CGFloat = 280
     fileprivate var maxHeight: CGFloat {
-        if #available(iOS 11.0, *), UIDevice.deviceType == .iPhoneX {
-            return (UIApplication.shared.keyWindow?.safeAreaInsets.top)! - 46
-        } else {
-           return -UIApplication.shared.statusBarFrame.height - 5
-        }
+        let safeAreaTop = UIApplication.shared.keyWindow?.safeAreaInsets.top ?? 0
+        let baseOffset: CGFloat = safeAreaTop >= 40 ? 70 : 45
+        return safeAreaTop - baseOffset
     }
     
     fileprivate var previousScrollOffset: CGFloat = 0
@@ -127,6 +125,11 @@ class AddTracksTabBarController: UITabBarController, UITabBarControllerDelegate,
         } else {
             cell.accessoryType = .none
         }
+        
+        if tableView == myHubController.tracksTableView,
+           indexPath.row >= tracksList.count - 5 {
+            myHubController.loadMoreMostPlayedIfNeeded()
+        }
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
@@ -183,7 +186,7 @@ extension AddTracksTabBarController {
         let absoluteTop: CGFloat = 0
         
         let isScrollingDown = scrollDiff > 0 && scrollView.contentOffset.y > absoluteTop
-        let isScrollingUp = scrollDiff < 0 && scrollView.contentOffset.y < absoluteTop
+        let isScrollingUp = scrollDiff < 0 && scrollView.contentOffset.y <= absoluteTop
         
         var newHeight = myHubController.headerHeightConstraint.constant
         
@@ -196,7 +199,7 @@ extension AddTracksTabBarController {
             
         } else if isScrollingUp {
             newHeight = min(minHeight, myHubController.headerHeightConstraint.constant + abs(scrollDiff))
-            if newHeight != myHubController.headerHeightConstraint.constant && myHubController.tracksTableView.contentOffset.y < 2 {
+            if newHeight != myHubController.headerHeightConstraint.constant && scrollView.contentOffset.y <= absoluteTop {
                 myHubController.headerHeightConstraint.constant = newHeight
                 setScrollPosition(forOffset: previousScrollOffset)
             }
