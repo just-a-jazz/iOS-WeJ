@@ -10,16 +10,15 @@ import UIKit
 import RKNotificationHub
 import NVActivityIndicatorView
 
-class MusicLibrarySelectionViewController: UIViewController, ViewControllerAccessDelegate {
+class MusicLibrarySelectionViewController: UIViewController, ViewControllerAccessDelegate, SelectionCountBadgePresenting {
     
     private weak var delegate: AddTracksTabBarController!
 
     @IBOutlet weak var headerHeightConstraint: NSLayoutConstraint!
     @IBOutlet weak var myLibraryLabel: UILabel!
     @IBOutlet weak var doneButton: UIButton!
-    private var badge: RKNotificationHub!
-    
-    private var totalTracksCount: Int {
+    var badge: RKNotificationHub!
+    var totalTracksCount: Int {
         let controller = tabBarController! as! AddTracksTabBarController
         return controller.tracksSelected.count + controller.libraryTracksSelected.count
     }
@@ -62,15 +61,10 @@ class MusicLibrarySelectionViewController: UIViewController, ViewControllerAcces
         }
     }
     
-    func setBadge(to count: Int) {
-        badge.count = Int32(count)
-        badge.pop()
-    }
-    
     override func viewDidLoad() {
         super.viewDidLoad()
         hideNavigationBar()
-        initializeBadge()
+        setupSelectionCountBadge()
         initializeVariables()
         
         setDelegates()
@@ -87,14 +81,6 @@ class MusicLibrarySelectionViewController: UIViewController, ViewControllerAcces
     
     private func hideNavigationBar() {
         navigationController?.navigationBar.isHidden = true
-    }
-    
-    private func initializeBadge() {
-        badge = RKNotificationHub(view: doneButton.titleLabel)
-        badge.count = Int32(totalTracksCount)
-        badge.moveCircleBy(x: CGFloat(Float(NSLocalizedString("DoneBadgeConstraint", comment: "")) ?? 51.0), y: 0)
-        badge.scaleCircleSize(by: 0.7)
-        badge.setCircleColor(AppConstants.orange, label: .white)
     }
     
     private func initializeVariables() {

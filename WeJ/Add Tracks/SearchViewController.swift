@@ -10,7 +10,7 @@ import UIKit
 import RKNotificationHub
 import NVActivityIndicatorView
 
-class SearchViewController: UIViewController, UITextFieldDelegate {
+class SearchViewController: UIViewController, UITextFieldDelegate, SelectionCountBadgePresenting {
     
     private weak var delegate: AddTracksTabBarController!
     
@@ -18,8 +18,8 @@ class SearchViewController: UIViewController, UITextFieldDelegate {
     
     @IBOutlet weak var searchTracksField: searchTextField!
     @IBOutlet weak var doneButton: UIButton!
-    private var badge: RKNotificationHub!
-    private var totalTracksCount: Int {
+    var badge: RKNotificationHub!
+    var totalTracksCount: Int {
         let controller = tabBarController! as! AddTracksTabBarController
         return controller.tracksSelected.count + controller.libraryTracksSelected.count
     }
@@ -40,17 +40,11 @@ class SearchViewController: UIViewController, UITextFieldDelegate {
     @IBOutlet weak var activityIndicator: NVActivityIndicatorView!
     @IBOutlet weak var noTracksFoundLabel: UILabel!
     
-    func setBadge(to count: Int) {
-        guard badge != nil else { return }
-        badge.count = Int32(count)
-        badge.pop()
-    }
-    
     // MARK: - Lifecycle
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        initializeBadge()
+        setupSelectionCountBadge()
         initializeVariables()
         
         setDelegates()
@@ -66,14 +60,6 @@ class SearchViewController: UIViewController, UITextFieldDelegate {
     override func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(animated)
         searchTracksField.resignFirstResponder()
-    }
-    
-    private func initializeBadge() {
-        badge = RKNotificationHub(view: doneButton.titleLabel)
-        badge.count = Int32(totalTracksCount)
-        badge.moveCircleBy(x: 51, y: 0)
-        badge.scaleCircleSize(by: 0.7)
-        badge.setCircleColor(AppConstants.orange, label: .white)
     }
     
     // MARK: - Functions

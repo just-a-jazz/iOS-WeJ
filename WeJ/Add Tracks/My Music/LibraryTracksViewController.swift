@@ -15,14 +15,14 @@ protocol LibraryTracksViewControllerDelegate: class {
     func updateTable()
 }
 
-class LibraryTracksViewController: UIViewController, UITableViewDelegate, UITableViewDataSource {
+class LibraryTracksViewController: UIViewController, UITableViewDelegate, UITableViewDataSource, SelectionCountBadgePresenting {
     
     weak var delegate: LibraryTracksViewControllerDelegate?
     
     @IBOutlet weak var titleLabel: UILabel!
     @IBOutlet weak var doneButton: UIButton!
-    private var badge: RKNotificationHub!
-    private var totalTracksCount: Int {
+    var badge: RKNotificationHub!
+    var totalTracksCount: Int {
         let controller = tabBarController! as! AddTracksTabBarController
         return controller.tracksSelected.count + controller.libraryTracksSelected.count
     }
@@ -69,14 +69,9 @@ class LibraryTracksViewController: UIViewController, UITableViewDelegate, UITabl
         }
     }
     
-    func setBadge(to count: Int) {
-        badge.count = Int32(count)
-        badge.pop()
-    }
-    
     override func viewDidLoad() {
         super.viewDidLoad()
-        initializeBadge()
+        setupSelectionCountBadge()
         initializeVariables()
         
         setDelegates()
@@ -94,14 +89,6 @@ class LibraryTracksViewController: UIViewController, UITableViewDelegate, UITabl
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         setBadge(to: totalTracksCount)
-    }
-    
-    private func initializeBadge() {
-        badge = RKNotificationHub(view: doneButton.titleLabel)
-        badge.count = Int32(totalTracksCount)
-        badge.moveCircleBy(x: 51, y: 0)
-        badge.scaleCircleSize(by: 0.7)
-        badge.setCircleColor(AppConstants.orange, label: .white)
     }
     
     private func initializeVariables() {

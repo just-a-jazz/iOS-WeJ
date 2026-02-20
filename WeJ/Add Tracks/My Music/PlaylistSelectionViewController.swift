@@ -9,12 +9,12 @@
 import UIKit
 import RKNotificationHub
 
-class PlaylistSelectionViewController: UIViewController {
+class PlaylistSelectionViewController: UIViewController, SelectionCountBadgePresenting {
     
     @IBOutlet weak var titleLabel: UILabel!
     @IBOutlet weak var doneButton: UIButton!
-    private var badge: RKNotificationHub!
-    private var totalTracksCount: Int {
+    var badge: RKNotificationHub!
+    var totalTracksCount: Int {
         let controller = tabBarController! as! AddTracksTabBarController
         return controller.tracksSelected.count + controller.libraryTracksSelected.count
     }
@@ -43,14 +43,9 @@ class PlaylistSelectionViewController: UIViewController {
         ]
     }
     
-    func setBadge(to count: Int) {
-        badge.count = Int32(count)
-        badge.pop()
-    }
-
     override func viewDidLoad() {
         super.viewDidLoad()
-        initializeBadge()
+        setupSelectionCountBadge()
         adjustViews()
         adjustFontSizes()
     }
@@ -58,14 +53,6 @@ class PlaylistSelectionViewController: UIViewController {
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         setBadge(to: totalTracksCount)
-    }
-    
-    private func initializeBadge() {
-        badge = RKNotificationHub(view: doneButton.titleLabel)
-        badge.count = Int32(totalTracksCount)
-        badge.moveCircleBy(x: 51, y: 0)
-        badge.scaleCircleSize(by: 0.7)
-        badge.setCircleColor(AppConstants.orange, label: .white)
     }
     
     private func adjustViews() {
