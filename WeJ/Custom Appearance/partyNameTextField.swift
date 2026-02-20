@@ -10,6 +10,8 @@ import UIKit
 
 class partyNameTextField: UITextField {
     
+    private let bottomLine = CALayer()
+    
     required init?(coder aDecoder: NSCoder) {
         super.init(coder: aDecoder)
         customizeTextField()
@@ -23,11 +25,19 @@ class partyNameTextField: UITextField {
     }
     
     func addBottomBorder() {
-        let bottomLine = CALayer()
-        bottomLine.frame = CGRect(x: 0, y: frame.height + 10, width: frame.width, height: 1)
         bottomLine.backgroundColor = AppConstants.orange.cgColor
         borderStyle = .none
         layer.addSublayer(bottomLine)
+        updateBottomBorderFrame()
+    }
+    
+    override func layoutSubviews() {
+        super.layoutSubviews()
+        updateBottomBorderFrame()
+    }
+    
+    private func updateBottomBorderFrame() {
+        bottomLine.frame = CGRect(x: 0, y: bounds.height + 10, width: bounds.width, height: 1)
     }
     
 }
