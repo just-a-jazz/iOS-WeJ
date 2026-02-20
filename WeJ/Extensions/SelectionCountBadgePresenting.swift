@@ -23,6 +23,7 @@ extension SelectionCountBadgePresenting where Self: UIViewController {
         badge.scaleCircleSize(by: 0.6)
         badge.moveCircleBy(x: -4, y: 4)
         badge.setCircleColor(AppConstants.orange, label: .white)
+        configureSelectionCountTitleLabel()
         updateSelectionCountBadge(to: totalTracksCount)
     }
     
@@ -31,10 +32,15 @@ extension SelectionCountBadgePresenting where Self: UIViewController {
         badge.count = Int32(count)
         badge.pop()
         let titleKey = count > 0 ? "Add" : "Done"
-        doneButton.setTitle(NSLocalizedString(titleKey, comment: ""), for: .normal)
+        let title = NSLocalizedString(titleKey, comment: "")
+        doneButton.setTitle(title, for: .normal)
     }
     
     func setBadge(to count: Int) {
         updateSelectionCountBadge(to: count)
+    }
+    
+    private func configureSelectionCountTitleLabel() {
+        doneButton.titleLabel?.alpha = 1
     }
 }

@@ -17,6 +17,7 @@ class QueueViewController: UIViewController, UITableViewDelegate, UITableViewDat
     @IBOutlet weak var editButton: UIButton!
     
     @IBOutlet weak var tracksTableView: UITableView!
+    private var upNextSeparator: UIView?
 
     fileprivate var minHeight: CGFloat {
         return HubAndQueuePageViewController.minHeight
@@ -31,6 +32,7 @@ class QueueViewController: UIViewController, UITableViewDelegate, UITableViewDat
         super.viewDidLoad()
         setDelegates()
         adjustFontSizes()
+        addUpNextSeparatorIfNeeded()
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -47,6 +49,27 @@ class QueueViewController: UIViewController, UITableViewDelegate, UITableViewDat
     private func setDelegates() {
         tracksTableView.delegate = self
         tracksTableView.dataSource = self
+    }
+
+    private func addUpNextSeparatorIfNeeded() {
+        guard upNextSeparator == nil else { return }
+
+        let separator = UIView()
+        separator.translatesAutoresizingMaskIntoConstraints = false
+        separator.backgroundColor = UIColor.white.withAlphaComponent(0.2)
+        view.addSubview(separator)
+
+        let guide = view.safeAreaLayoutGuide
+        let horizontalInset: CGFloat = 30
+
+        NSLayoutConstraint.activate([
+            separator.topAnchor.constraint(equalTo: upNextLabel.bottomAnchor, constant: 10),
+            separator.leadingAnchor.constraint(equalTo: guide.leadingAnchor, constant: horizontalInset),
+            separator.trailingAnchor.constraint(equalTo: guide.trailingAnchor, constant: -horizontalInset),
+            separator.heightAnchor.constraint(equalToConstant: 1 / UIScreen.main.scale)
+        ])
+
+        upNextSeparator = separator
     }
     
     // MARK: - Table
@@ -81,11 +104,18 @@ class QueueViewController: UIViewController, UITableViewDelegate, UITableViewDat
     @IBAction func editCells(_ sender: UIButton) {
         if sender.titleLabel?.text == NSLocalizedString("Edit", comment: "") {
             tracksTableView.setEditing(true, animated: true)
-            sender.setTitle(NSLocalizedString("Done", comment: ""), for: .normal)
+            animateEditButtonTitle(sender, to: NSLocalizedString("Done", comment: ""))
         } else {
             tracksTableView.setEditing(false, animated: true)
-            sender.setTitle(NSLocalizedString("Edit", comment: ""), for: .normal)
+            animateEditButtonTitle(sender, to: NSLocalizedString("Edit", comment: ""))
         }
+    }
+
+    private func animateEditButtonTitle(_ button: UIButton, to title: String) {
+        guard button.title(for: .normal) != title else { return }
+        UIView.transition(with: button, duration: 0.2, options: .transitionCrossDissolve, animations: {
+            button.setTitle(title, for: .normal)
+        })
     }
     
     func tableView(_ tableView: UITableView, canEditRowAt indexPath: IndexPath) -> Bool {
@@ -199,8 +229,21 @@ extension QueueViewController {
     
     fileprivate func goIntoEditingMode() {
         if (delegate!.isHost && Party.tracksQueue.count > 1) || tracksQueueHasEditableTracks() {
-            editButton.isHidden = false
-            addButton.isHidden = true
+            if addButton.isHidden {
+                editButton.isHidden = false
+            } else {
+                editButton.alpha = 0
+                editButton.isHidden = false
+                UIView.animate(withDuration: 0.1, animations: {
+                    self.addButton.alpha = 0
+                }) { _ in
+                    self.addButton.isHidden = true
+                    UIView.animate(withDuration: 0.1) {
+                        self.editButton.alpha = 1
+                    }
+                }
+            }
+            animateEditButtonTitle(editButton, to: NSLocalizedString("Edit", comment: ""))
         }
     }
     
@@ -215,9 +258,21 @@ extension QueueViewController {
     
     fileprivate func comeOutOfEditingMode() {
         tracksTableView.setEditing(false, animated: true)
-        editButton.isHidden = true
-        addButton.isHidden = false
-        editButton.setTitle(NSLocalizedString("Edit", comment: ""), for: .normal)
+        if editButton.isHidden {
+            addButton.isHidden = false
+        } else {
+            addButton.alpha = 0
+            addButton.isHidden = false
+            UIView.animate(withDuration: 0.1, animations: {
+                self.editButton.alpha = 0
+            }) { _ in
+                self.editButton.isHidden = true
+                UIView.animate(withDuration: 0.1) {
+                    self.addButton.alpha = 1
+                }
+            }
+        }
+        animateEditButtonTitle(editButton, to: NSLocalizedString("Edit", comment: ""))
     }
     
     func scrollViewDidEndDecelerating(_ scrollView: UIScrollView) {

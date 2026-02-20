@@ -40,6 +40,10 @@ class MusicPlayer: NSObject, SPTAppRemoteDelegate, SPTAppRemotePlayerStateDelega
         }
     }
     
+    var currentTrackURI: String? {
+        return spotifyPlayerState?.track.uri
+    }
+    
     var isSafeToPlayNextTrack: Bool {
         return !Party.tracksQueue.isEmpty && self.musicService == .spotify
     }

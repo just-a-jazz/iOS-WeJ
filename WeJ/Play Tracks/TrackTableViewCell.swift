@@ -24,4 +24,34 @@ class TrackTableViewCell: UITableViewCell {
         }
     }
     
+    override func layoutSubviews() {
+        super.layoutSubviews()
+        
+        guard isEditing else { return }
+        
+        let horizontalInset: CGFloat = 30
+        let layoutDirection = effectiveUserInterfaceLayoutDirection
+        
+        for subview in subviews {
+            let typeName = String(describing: type(of: subview))
+            if typeName.contains("EditControl") {
+                var frame = subview.frame
+                if layoutDirection == .rightToLeft {
+                    frame.origin.x = bounds.width - horizontalInset - frame.width
+                } else {
+                    frame.origin.x = horizontalInset
+                }
+                subview.frame = frame
+            } else if typeName.contains("Reorder") {
+                var frame = subview.frame
+                if layoutDirection == .rightToLeft {
+                    frame.origin.x = horizontalInset
+                } else {
+                    frame.origin.x = bounds.width - horizontalInset - frame.width
+                }
+                subview.frame = frame
+            }
+        }
+    }
+    
 }

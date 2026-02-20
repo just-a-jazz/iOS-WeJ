@@ -195,9 +195,23 @@ class PartyViewController: UIViewController, MusicPlayerDelegate, UpdatePartyDel
                 } else {
                     changeToPauseButton(animated: false)
                 }
+                syncSpotifyQueueIfNeeded()
             }
         }
         networkManager?.advertise()
+    }
+
+    private func syncSpotifyQueueIfNeeded() {
+        guard isHost,
+              !Party.tracksQueue.isEmpty,
+              let currentURI = musicPlayer.currentTrackURI else {
+            return
+        }
+
+        let expectedURI = "spotify:track:" + Party.tracksQueue[0].id
+        if currentURI != expectedURI {
+            playNextTrack(force: true)
+        }
     }
     
     // This method is made to change Apple Music songs when it ends since playbackState (when the song ends) isn't consistent across iOS versions

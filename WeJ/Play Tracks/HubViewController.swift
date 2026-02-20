@@ -26,6 +26,7 @@ class HubViewController: UIViewController, UITableViewDelegate, UITableViewDataS
     private let hubIcons = [#imageLiteral(resourceName: "lyricsIcon"), #imageLiteral(resourceName: "leavePartyIcon")]
     @IBOutlet weak var hubTableView: UITableView!
     @IBOutlet weak var hubLabel: UILabel!
+    private var hubTitleSeparator: UIView?
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -47,6 +48,28 @@ class HubViewController: UIViewController, UITableViewDelegate, UITableViewDataS
     func adjustViews() {
         updateHubTitle()
         hubTableView.tableFooterView = UIView()
+        addHubTitleSeparatorIfNeeded()
+    }
+
+    private func addHubTitleSeparatorIfNeeded() {
+        guard hubTitleSeparator == nil, let titleLabel = hubTitle else { return }
+
+        let separator = UIView()
+        separator.translatesAutoresizingMaskIntoConstraints = false
+        separator.backgroundColor = UIColor.white.withAlphaComponent(0.2)
+        view.addSubview(separator)
+
+        let guide = view.safeAreaLayoutGuide
+        let horizontalInset: CGFloat = 20
+
+        NSLayoutConstraint.activate([
+            separator.topAnchor.constraint(equalTo: titleLabel.bottomAnchor, constant: 13),
+            separator.leadingAnchor.constraint(equalTo: guide.leadingAnchor, constant: horizontalInset),
+            separator.trailingAnchor.constraint(equalTo: guide.trailingAnchor, constant: -horizontalInset),
+            separator.heightAnchor.constraint(equalToConstant: 1 / UIScreen.main.scale)
+        ])
+
+        hubTitleSeparator = separator
     }
     
     // MARK: - Table
