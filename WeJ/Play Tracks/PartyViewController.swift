@@ -41,7 +41,7 @@ protocol PartyViewControllerInfoDelegate: class {
     func layout()
 }
 
-class PartyViewController: UIViewController, SPTAudioStreamingPlaybackDelegate, MusicPlayerDelegate, UpdatePartyDelegate, NetworkManagerDelegate, PartyViewControllerInfoDelegate {
+class PartyViewController: UIViewController, MusicPlayerDelegate, UpdatePartyDelegate, NetworkManagerDelegate, PartyViewControllerInfoDelegate {
     
     // MARK: - Storyboard Variables
     
@@ -160,10 +160,6 @@ class PartyViewController: UIViewController, SPTAudioStreamingPlaybackDelegate, 
         initializeCommandCenter()
         setupControlEvents()
         musicPlayer.preparePlayer()
-        
-        if Party.musicService == .spotify {
-            setSpotifyDelegates()
-        }
     }
     
     private func initializeStatusIndicatorView() {
@@ -193,6 +189,12 @@ class PartyViewController: UIViewController, SPTAudioStreamingPlaybackDelegate, 
             } else if Party.musicService == .appleMusic {
                 changeToPauseButton(animated: false)
                 BackgroundTask.startBackgroundTask()
+            } else if Party.musicService == .spotify {
+                if musicPlayer.isPaused {
+                    changeToPlayButton(animated: false)
+                } else {
+                    changeToPauseButton(animated: false)
+                }
             }
         }
         networkManager?.advertise()
@@ -200,7 +202,14 @@ class PartyViewController: UIViewController, SPTAudioStreamingPlaybackDelegate, 
     
     // This method is made to change Apple Music songs when it ends since playbackState (when the song ends) isn't consistent across iOS versions
     private func skipToNextSongIfRequired() {
-        if !Party.tracksQueue.isEmpty && Party.musicService == .appleMusic  && (Party.tracksQueue[0].length! - musicPlayer.currentPosition! <= 1) {
+        guard !Party.tracksQueue.isEmpty,
+              Party.musicService == .appleMusic,
+              let trackLength = Party.tracksQueue[0].length,
+              let position = musicPlayer.currentPosition else {
+            return
+        }
+        
+        if trackLength - position <= 1 {
             playNextTrack(force: true)
         }
     }
@@ -227,7 +236,7 @@ class PartyViewController: UIViewController, SPTAudioStreamingPlaybackDelegate, 
         
         MPRemoteCommandCenter.shared().changePlaybackPositionCommand.addTarget { [weak self] (event) -> MPRemoteCommandHandlerStatus in
             self?.musicPlayer.isScrubbing = true
-            self?.musicPlayer.scrubTrack(toPosition: (event as! MPChangePlaybackPositionCommandEvent).positionTime) { (error) in
+            self?.musicPlayer.scrubTrack(toPosition: (event as! MPChangePlaybackPositionCommandEvent).positionTime) { _ in
                 self?.musicPlayer.isScrubbing = false
             }
             return .success
@@ -255,10 +264,6 @@ class PartyViewController: UIViewController, SPTAudioStreamingPlaybackDelegate, 
                                             MPMediaItemPropertyArtwork: artwork]
             MPNowPlayingInfoCenter.default().nowPlayingInfo = trackInfo
         }
-    }
-    
-    private func setSpotifyDelegates() {
-        musicPlayer.spotifyPlayer?.playbackDelegate = self
     }
     
     // MARK: - UpdatePartyDelegate
@@ -412,31 +417,6 @@ class PartyViewController: UIViewController, SPTAudioStreamingPlaybackDelegate, 
         
         if let i = Party.tracksQueue.index(where: { $0.id == id }) {
             Party.tracksQueue.remove(at: i)
-        }
-    }
-    
-    // MARK: - Spotify Playback
-    
-    func audioStreaming(_ audioStreaming: SPTAudioStreamingController!, didChangePlaybackStatus isPlaying: Bool) {
-        if isPlaying {
-            activateAudioSession()
-        }
-    }
-    
-    private func activateAudioSession() {
-        try? AVAudioSession.sharedInstance().setCategory(AVAudioSessionCategoryPlayback)
-        try? AVAudioSession.sharedInstance().setActive(true)
-    }
-    
-    func audioStreaming(_ audioStreaming: SPTAudioStreamingController!, didStopPlayingTrack trackUri: String!) {
-        playNextTrack()
-    }
-    
-    func audioStreaming(_ audioStreaming: SPTAudioStreamingController!, didReceive event: SpPlaybackEvent) {
-        if event == SPPlaybackNotifyPlay {
-            changeToPauseButton(animated: true)
-        } else if event == SPPlaybackNotifyPause {
-            changeToPlayButton(animated: true)
         }
     }
     

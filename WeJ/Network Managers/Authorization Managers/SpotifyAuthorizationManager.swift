@@ -19,8 +19,11 @@ class SpotifyAuthorizationManager: NSObject, AuthorizationManager, SPTSessionMan
     
     private let configuration: SPTConfiguration
     private let sessionManager: SPTSessionManager
-    private let webAuthScopes = ["user-library-read", "playlist-read-private", "streaming", "user-top-read"]
+    private let webAuthScopes = ["user-library-read", "playlist-read-private", "streaming", "user-top-read", "app-remote-control"]
     private let spotifyAuthSession: URLSession
+    lazy var appRemote: SPTAppRemote = {
+        SPTAppRemote(configuration: configuration, logLevel: .none)
+    }()
     
     private static let webAccessTokenDefaultsKey = "spotifyWebAccessToken"
     private static let webRefreshTokenDefaultsKey = "spotifyWebRefreshToken"
@@ -70,6 +73,9 @@ class SpotifyAuthorizationManager: NSObject, AuthorizationManager, SPTSessionMan
     static func handleAuthCallback(application: UIApplication, open url: URL, options: [UIApplicationOpenURLOptionsKey : Any]) -> Bool {
         let manager = shared
         if manager.handleWebAuthCallback(url) {
+            return true
+        }
+        if manager.handleAppRemoteCallback(url) {
             return true
         }
         return manager.sessionManager.application(application, open: url, options: options)
@@ -171,6 +177,17 @@ class SpotifyAuthorizationManager: NSObject, AuthorizationManager, SPTSessionMan
     private func handleWebAuthCallback(_ url: URL) -> Bool {
         guard isWebAuthInProgress, url.scheme == SpotifyConstants.redirectURL.scheme else { return false }
         handleWebAuthCallback(url, error: nil)
+        return true
+    }
+    
+    private func handleAppRemoteCallback(_ url: URL) -> Bool {
+        guard let parameters = appRemote.authorizationParameters(from: url),
+              let accessToken = parameters[SPTAppRemoteAccessTokenKey] else {
+            return false
+        }
+        
+        appRemote.connectionParameters.accessToken = accessToken
+        appRemote.connect()
         return true
     }
     

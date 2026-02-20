@@ -9,13 +9,18 @@
 import Foundation
 import StoreKit
 import MediaPlayer
+import SpotifyiOS
 
-class MusicPlayer {
+class MusicPlayer: NSObject, SPTAppRemoteDelegate, SPTAppRemotePlayerStateDelegate {
     
     // MARK: - Music Player Variables
     
     var appleMusicPlayer = MPMusicPlayerController.applicationMusicPlayer
-    var spotifyPlayer = SPTAudioStreamingController.sharedInstance()
+    private var spotifyAppRemote: SPTAppRemote {
+        SpotifyAuthorizationManager.shared.appRemote
+    }
+    private var spotifyPlayerState: SPTAppRemotePlayerState?
+    private var pendingPlayURI: String?
     
     let musicService = Party.musicService
     
@@ -27,7 +32,11 @@ class MusicPlayer {
     
     var currentPosition: TimeInterval? {
         get {
-            return (musicService == .spotify) ? spotifyPlayer?.playbackState?.position : appleMusicPlayer.currentPlaybackTime
+            if musicService == .spotify {
+                guard let playbackPosition = spotifyPlayerState?.playbackPosition else { return nil }
+                return TimeInterval(playbackPosition) / 1000
+            }
+            return appleMusicPlayer.currentPlaybackTime
         }
     }
     
@@ -36,14 +45,15 @@ class MusicPlayer {
     }
     
     var isPaused: Bool {
-        return musicService == .spotify ? spotifyPlayer?.playbackState.isPlaying == false : appleMusicPlayer.playbackState == .paused
+        return musicService == .spotify ? (spotifyPlayerState?.isPaused ?? true) : appleMusicPlayer.playbackState == .paused
     }
     
     // MARK: - Playback
     
     func preparePlayer() {
         if self.musicService == .spotify {
-            spotifyPlayer?.setTargetBitrate(.low, callback: nil)
+            prepareSpotifyAppRemote()
+            connectSpotifyIfNeeded()
         } else {
             appleMusicPlayer.beginGeneratingPlaybackNotifications()
         }
@@ -60,11 +70,17 @@ class MusicPlayer {
     }
     
     private func startSpotifyPlayer(withTracks tracks: [Track]) {
-        if !tracks.isEmpty {
-            try? AVAudioSession.sharedInstance().setActive(true)
-            spotifyPlayer?.playSpotifyURI("spotify:track:" + tracks[0].id, startingWith: 0, startingWithPosition: 0, callback: nil)
+        guard !tracks.isEmpty else {
+            spotifyAppRemote.playerAPI?.pause(nil)
+            return
+        }
+
+        prepareSpotifyAppRemote()
+        let uri = "spotify:track:" + tracks[0].id
+        if spotifyAppRemote.isConnected {
+            spotifyAppRemote.playerAPI?.play(uri, callback: nil)
         } else {
-            spotifyPlayer?.setIsPlaying(false, callback: nil)
+            connectOrAuthorizeAndPlay(uri: uri)
         }
     }
     
@@ -81,7 +97,11 @@ class MusicPlayer {
     
     func playTrack() {
         if musicService == .spotify {
-            spotifyPlayer?.setIsPlaying(true, callback: nil)
+            if spotifyAppRemote.isConnected {
+                spotifyAppRemote.playerAPI?.resume(nil)
+            } else if let track = Party.tracksQueue.first {
+                connectOrAuthorizeAndPlay(uri: "spotify:track:" + track.id)
+            }
         } else {
             delegate?.alertPreviousiOSVersionUsers()
             BackgroundTask.startBackgroundTask()
@@ -102,28 +122,91 @@ class MusicPlayer {
     
     func pauseTrack() {
         if musicService == .spotify {
-            spotifyPlayer?.setIsPlaying(false, callback: nil)
+            spotifyAppRemote.playerAPI?.pause(nil)
         } else {
             BackgroundTask.stopBackgroundTask()
             appleMusicPlayer.pause()
         }
     }
     
-    func scrubTrack(toPosition position: TimeInterval, callback: @escaping SPTErrorableOperationCallback) {
+    func scrubTrack(toPosition position: TimeInterval, callback: @escaping (Error?) -> Void) {
         if musicService == .spotify {
-            spotifyPlayer?.seek(to: position, callback: callback)
+            let positionInMilliseconds = Int(position * 1000)
+            spotifyAppRemote.playerAPI?.seek(toPosition: positionInMilliseconds) { _, error in
+                callback(error)
+            }
         }
     }
     
     func exitPlayer() {
-        if musicService == .spotify && spotifyPlayer!.playbackState.isPlaying {
-            spotifyPlayer?.setIsPlaying(false, callback: nil)
+        if musicService == .spotify, spotifyAppRemote.isConnected {
+            spotifyAppRemote.playerAPI?.pause(nil)
+            spotifyAppRemote.disconnect()
         }
         
         if musicService == .appleMusic && appleMusicPlayer.playbackState == .playing {
             BackgroundTask.stopBackgroundTask()
             appleMusicPlayer.stop()
         }
+    }
+    
+    // MARK: - Spotify App Remote
+    
+    private func connectSpotifyIfNeeded() {
+        guard musicService == .spotify else { return }
+        
+        DispatchQueue.global(qos: .userInitiated).async {
+            SpotifyAuthorizationManager.ensureValidWebAccessToken()
+            DispatchQueue.main.async { [weak self] in
+                self?.configureSpotifyAccessToken()
+                if self?.spotifyAppRemote.isConnected == false {
+                    self?.spotifyAppRemote.connect()
+                }
+            }
+        }
+    }
+    
+    private func prepareSpotifyAppRemote() {
+        spotifyAppRemote.delegate = self
+    }
+    
+    private func configureSpotifyAccessToken() {
+        spotifyAppRemote.connectionParameters.accessToken = Party.cookie
+    }
+    
+    private func connectOrAuthorizeAndPlay(uri: String) {
+        pendingPlayURI = uri
+        configureSpotifyAccessToken()
+        spotifyAppRemote.connect()
+    }
+    
+    func appRemoteDidEstablishConnection(_ appRemote: SPTAppRemote) {
+        appRemote.playerAPI?.delegate = self
+        appRemote.playerAPI?.subscribe(toPlayerState: { _, _ in })
+        appRemote.playerAPI?.getPlayerState { [weak self] state, _ in
+            self?.spotifyPlayerState = state as? SPTAppRemotePlayerState
+        }
+        if let uri = pendingPlayURI {
+            pendingPlayURI = nil
+            appRemote.playerAPI?.play(uri, callback: nil)
+        }
+    }
+    
+    func appRemote(_ appRemote: SPTAppRemote, didFailConnectionAttemptWithError error: Error?) {
+        if let uri = pendingPlayURI {
+            pendingPlayURI = nil
+            configureSpotifyAccessToken()
+            appRemote.authorizeAndPlayURI(uri, completionHandler: nil)
+        }
+        spotifyPlayerState = nil
+    }
+    
+    func appRemote(_ appRemote: SPTAppRemote, didDisconnectWithError error: Error?) {
+        spotifyPlayerState = nil
+    }
+    
+    func playerStateDidChange(_ playerState: SPTAppRemotePlayerState) {
+        spotifyPlayerState = playerState
     }
     
 }

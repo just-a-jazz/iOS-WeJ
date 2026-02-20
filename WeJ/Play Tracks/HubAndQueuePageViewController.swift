@@ -18,10 +18,18 @@ class HubAndQueuePageViewController: UIPageViewController, UIPageViewControllerD
     private var allViewControllers = [UIViewController]()
     
     static var minHeight: CGFloat {
-        return UIDevice.deviceType == .iPhoneX ? 0.47 * UIScreen.main.bounds.height : 0.56 * UIScreen.main.bounds.height
+        let screenHeight = UIScreen.main.bounds.height
+        let window = UIApplication.shared.connectedScenes
+            .compactMap { $0 as? UIWindowScene }
+            .flatMap { $0.windows }
+            .first { $0.isKeyWindow }
+        let hasNotch = (window?.safeAreaInsets.bottom ?? 0) > 0
+        return (hasNotch ? 0.47 : 0.56) * screenHeight
     }
     static var maxHeight: CGFloat {
-        return Party.tracksQueue.isEmpty ? CGFloat(0.0) : CGFloat(120.0)
+        guard !Party.tracksQueue.isEmpty else { return 0.0 }
+        let screenHeight = UIScreen.main.bounds.height
+        return max(120.0, screenHeight * 0.16)
     }
 
     override func viewDidLoad() {
@@ -29,11 +37,22 @@ class HubAndQueuePageViewController: UIPageViewController, UIPageViewControllerD
         
         setDelegates()
         populateListOfViewControllers()
+        configureScrollViewTouchDelays()
     }
     
     private func setDelegates() {
         delegate = self
         dataSource = self
+    }
+    
+    // Ensure skip's button touches are not delayed by the page view controller scroll view.
+    private func configureScrollViewTouchDelays() {
+        for subview in view.subviews {
+            if let scrollView = subview as? UIScrollView {
+                scrollView.delaysContentTouches = false
+                scrollView.canCancelContentTouches = true
+            }
+        }
     }
     
     private func populateListOfViewControllers() {
