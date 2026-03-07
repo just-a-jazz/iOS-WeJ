@@ -108,7 +108,7 @@ class AppleMusicAuthorizationManager: NSObject, AuthorizationManager {
     }
     
     private static func handleAuthorization() async {
-        guard Party.cookie == nil else {
+        guard Party.appleMusicStorefront == nil else {
             await MainActor.run {
                 delegate?.performSegue(withIdentifier: storyboardSegue, sender: nil)
                 delegate?.processingLogin = false
@@ -153,7 +153,7 @@ class AppleMusicAuthorizationManager: NSObject, AuthorizationManager {
             return
         }
 
-        Party.cookie = storefrontID
+        Party.appleMusicStorefront = storefrontID
         await MainActor.run {
             delegate?.performSegue(withIdentifier: storyboardSegue, sender: nil)
             delegate?.processingLogin = false

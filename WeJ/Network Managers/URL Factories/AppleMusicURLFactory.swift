@@ -26,7 +26,7 @@ struct AppleMusicURLFactory {
     
     static func createSearchRequest(forTerm term: String) async -> URLRequest? {
         guard let developerToken = await AppleMusicAuthorizationManager.ensureDeveloperToken(),
-              let storefront = Party.cookie else {
+              let storefront = Party.appleMusicStorefront else {
             return nil
         }
         
@@ -84,7 +84,7 @@ struct AppleMusicURLFactory {
     
     static func createTrackRequest(forID id: String) async -> URLRequest? {
         guard let developerToken = await AppleMusicAuthorizationManager.ensureDeveloperToken(),
-              let storefront = Party.cookie else {
+              let storefront = Party.appleMusicStorefront else {
             return nil
         }
         

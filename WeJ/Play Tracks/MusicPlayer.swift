@@ -175,7 +175,7 @@ class MusicPlayer: NSObject, SPTAppRemoteDelegate, SPTAppRemotePlayerStateDelega
     }
     
     private func configureSpotifyAccessToken() {
-        spotifyAppRemote.connectionParameters.accessToken = Party.cookie
+        spotifyAppRemote.connectionParameters.accessToken = Party.spotifyAccessToken
     }
     
     private func connectOrAuthorizeAndPlay(uri: String) {

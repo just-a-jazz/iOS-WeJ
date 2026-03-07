@@ -31,7 +31,7 @@ struct SpotifyURLFactory {
         urlComponents.queryItems = queryItems
         
         var urlRequest = URLRequest(url: urlComponents.url!)
-        urlRequest.addValue("Bearer \(Party.cookie!)", forHTTPHeaderField: "Authorization")
+        urlRequest.addValue("Bearer \(Party.spotifyAccessToken!)", forHTTPHeaderField: "Authorization")
         
         return urlRequest
     }
@@ -43,7 +43,7 @@ struct SpotifyURLFactory {
         urlComponents.path = "/v1/tracks/\(id.components(separatedBy: ":")[1])"
         
         var urlRequest = URLRequest(url: urlComponents.url!)
-        urlRequest.addValue("Bearer \(Party.cookie!)", forHTTPHeaderField: "Authorization")
+        urlRequest.addValue("Bearer \(Party.spotifyAccessToken!)", forHTTPHeaderField: "Authorization")
         
         return urlRequest
     }
@@ -63,7 +63,7 @@ struct SpotifyURLFactory {
         urlComponents.queryItems = queryItems
         
         var urlRequest = URLRequest(url: urlComponents.url!)
-        urlRequest.addValue("Bearer \(Party.cookie!)", forHTTPHeaderField: "Authorization")
+        urlRequest.addValue("Bearer \(Party.spotifyAccessToken!)", forHTTPHeaderField: "Authorization")
         
         return urlRequest
     }
@@ -83,7 +83,7 @@ struct SpotifyURLFactory {
         urlComponents.queryItems = queryItems
         
         var urlRequest = URLRequest(url: urlComponents.url!)
-        urlRequest.addValue("Bearer \(Party.cookie!)", forHTTPHeaderField: "Authorization")
+        urlRequest.addValue("Bearer \(Party.spotifyAccessToken!)", forHTTPHeaderField: "Authorization")
         
         return urlRequest
     }
@@ -103,7 +103,7 @@ struct SpotifyURLFactory {
         urlComponents.queryItems = queryItems
         
         var urlRequest = URLRequest(url: urlComponents.url!)
-        urlRequest.addValue("Bearer \(Party.cookie!)", forHTTPHeaderField: "Authorization")
+        urlRequest.addValue("Bearer \(Party.spotifyAccessToken!)", forHTTPHeaderField: "Authorization")
         
         return urlRequest
     }
@@ -123,7 +123,7 @@ struct SpotifyURLFactory {
         urlComponents.queryItems = queryItems
         
         var urlRequest = URLRequest(url: urlComponents.url!)
-        urlRequest.addValue("Bearer \(Party.cookie!)", forHTTPHeaderField: "Authorization")
+        urlRequest.addValue("Bearer \(Party.spotifyAccessToken!)", forHTTPHeaderField: "Authorization")
         
         return urlRequest
     }
@@ -143,7 +143,7 @@ struct SpotifyURLFactory {
         urlComponents.queryItems = queryItems
         
         var urlRequest = URLRequest(url: urlComponents.url!)
-        urlRequest.addValue("Bearer \(Party.cookie!)", forHTTPHeaderField: "Authorization")
+        urlRequest.addValue("Bearer \(Party.spotifyAccessToken!)", forHTTPHeaderField: "Authorization")
         
         return urlRequest
     }
@@ -155,7 +155,7 @@ struct SpotifyURLFactory {
         urlComponents.path = "/v1/users/\(ownerID)/playlists/\(playlistID)"
         
         var urlRequest = URLRequest(url: urlComponents.url!)
-        urlRequest.addValue("Bearer \(Party.cookie!)", forHTTPHeaderField: "Authorization")
+        urlRequest.addValue("Bearer \(Party.spotifyAccessToken!)", forHTTPHeaderField: "Authorization")
         
         return urlRequest
     }
@@ -175,7 +175,7 @@ struct SpotifyURLFactory {
         urlComponents.queryItems = queryItems
         
         var urlRequest = URLRequest(url: urlComponents.url!)
-        urlRequest.addValue("Bearer \(Party.cookie!)", forHTTPHeaderField: "Authorization")
+        urlRequest.addValue("Bearer \(Party.spotifyAccessToken!)", forHTTPHeaderField: "Authorization")
         
         return urlRequest
     }

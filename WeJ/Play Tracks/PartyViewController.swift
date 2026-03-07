@@ -627,7 +627,8 @@ class PartyViewController: UIViewController, MusicPlayerDelegate, UpdatePartyDel
     func setup(withParty party: Party) {
         Party.name = type(of: party).name
         Party.musicService = type(of: party).musicService
-        Party.cookie = type(of: party).cookie
+        Party.spotifyAccessToken = type(of: party).spotifyAccessToken
+        Party.appleMusicStorefront = type(of: party).appleMusicStorefront
     }
     
     func update(usingPosition position: TimeInterval) {

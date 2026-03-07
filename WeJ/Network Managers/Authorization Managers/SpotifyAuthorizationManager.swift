@@ -54,7 +54,7 @@ class SpotifyAuthorizationManager: NSObject, AuthorizationManager, SPTSessionMan
         SpotifyAuthorizationManager.delegate?.processingLogin = true
         
         if let token = loadStoredValidWebAccessToken() {
-            Party.cookie = token
+            Party.spotifyAccessToken = token
             completeAuthorization()
             finishProcessingLogin()
             return
@@ -221,7 +221,7 @@ class SpotifyAuthorizationManager: NSObject, AuthorizationManager, SPTSessionMan
     static func ensureValidWebAccessToken() {
         let manager = shared
         if let token = manager.loadStoredValidWebAccessToken() {
-            Party.cookie = token
+            Party.spotifyAccessToken = token
             return
         }
         
@@ -279,7 +279,7 @@ class SpotifyAuthorizationManager: NSObject, AuthorizationManager, SPTSessionMan
     
     private func updateStoredTokens(with response: WebTokenResponse) {
         storeWebTokens(accessToken: response.accessToken, refreshToken: response.refreshToken, expiresIn: response.expiresIn)
-        Party.cookie = response.accessToken
+        Party.spotifyAccessToken = response.accessToken
     }
     
     private func storeWebTokens(accessToken: String, refreshToken: String?, expiresIn: Double) {

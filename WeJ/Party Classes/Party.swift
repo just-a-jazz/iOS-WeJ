@@ -32,7 +32,14 @@ class Party: NSObject, NSCoding {
         }
     }
     static var tracksFromMyself = [Track]()
-    static var cookie: String? { // Represents Spotify access token or Apple Music country code
+    static var spotifyAccessToken: String? {
+        didSet {
+            DispatchQueue.main.async {
+                delegate?.hubAndQueueVC?.showAddButton()
+            }
+        }
+    }
+    static var appleMusicStorefront: String? {
         didSet {
             DispatchQueue.main.async {
                 delegate?.hubAndQueueVC?.showAddButton()
@@ -45,7 +52,8 @@ class Party: NSObject, NSCoding {
         musicService = .spotify
         tracksQueue.removeAll()
         tracksFromMyself.removeAll()
-        cookie = nil
+        spotifyAccessToken = nil
+        appleMusicStorefront = nil
     }
     
     static func tracksQueue(hasTrack track: Track) -> Bool {
@@ -57,19 +65,23 @@ class Party: NSObject, NSCoding {
     func encode(with aCoder: NSCoder) {
         aCoder.encode(Party.name, forKey: "name")
         aCoder.encode(Party.musicService.rawValue, forKey: "musicService")
-        aCoder.encode(Party.cookie, forKey: "cookie")
+        aCoder.encode(Party.spotifyAccessToken, forKey: "spotifyAccessToken")
+        aCoder.encode(Party.appleMusicStorefront, forKey: "appleMusicStorefront")
     }
     
     convenience required init?(coder aDecoder: NSCoder) {
         let name = aDecoder.decodeObject(forKey: "name") as? String
         let musicService = aDecoder.decodeObject(forKey: "musicService") as! String
+        let spotifyAccessToken = aDecoder.decodeObject(forKey: "spotifyAccessToken") as? String
+        let appleMusicStorefront = aDecoder.decodeObject(forKey: "appleMusicStorefront") as? String
         let cookie = aDecoder.decodeObject(forKey: "cookie") as? String
         
         self.init()
         
         Party.name = name
         Party.musicService = MusicService(rawValue: musicService)!
-        Party.cookie = cookie
+        Party.spotifyAccessToken = spotifyAccessToken ?? cookie
+        Party.appleMusicStorefront = appleMusicStorefront ?? cookie
     }
     
 }
