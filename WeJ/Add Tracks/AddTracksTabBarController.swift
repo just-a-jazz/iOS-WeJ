@@ -71,6 +71,7 @@ class AddTracksTabBarController: UITabBarController, UITabBarControllerDelegate,
         setDelegates()
         
         adjustViews()
+        configureTabBarAppearance()
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -86,6 +87,17 @@ class AddTracksTabBarController: UITabBarController, UITabBarControllerDelegate,
         UITabBarItem.appearance().setTitleTextAttributes([
             NSAttributedStringKey.font: UIFont(name: "AvenirNext-Regular", size: 10)!
             ], for: .normal)
+        
+        tabBar.items?.forEach { item in
+            item.titlePositionAdjustment = UIOffset(horizontal: 0, vertical: 2)
+            item.imageInsets = UIEdgeInsets(top: 2, left: 0, bottom: -2, right: 0)
+        }
+    }
+
+    private func configureTabBarAppearance() {
+        tabBar.isTranslucent = false
+        tabBar.barTintColor = AppConstants.darkerBlack
+        tabBar.backgroundColor = AppConstants.darkerBlack
     }
     
     private func initializeVariables() {
@@ -186,7 +198,10 @@ extension AddTracksTabBarController {
         let absoluteTop: CGFloat = 0
         
         let isScrollingDown = scrollDiff > 0 && scrollView.contentOffset.y > absoluteTop
-        let isScrollingUp = scrollDiff < 0 && scrollView.contentOffset.y <= absoluteTop
+        let isPullingDown = scrollView.panGestureRecognizer.translation(in: scrollView).y > 0
+        let isScrollingUp = scrollDiff < 0
+            && scrollView.contentOffset.y <= absoluteTop
+            && isPullingDown
         
         var newHeight = myHubController.headerHeightConstraint.constant
         

@@ -40,9 +40,12 @@ class AppleMusicFetcher: Fetcher {
     }
     
     func searchCatalog(forTerm term: String, completionHandler: @escaping () -> Void) {
-        DispatchQueue.global(qos: .userInitiated).async {
-            let request = AppleMusicURLFactory.createSearchRequest(forTerm: term)
-            
+        Task { [weak self] in
+            guard let request = await AppleMusicURLFactory.createSearchRequest(forTerm: term) else {
+                completionHandler()
+                return
+            }
+
             AppleMusicFetcher.templateWebRequest(request) { [weak self] (data, response, _) in
                 let tracksJSON = try! JSON(data: data!)["results"]["songs"]["data"].arrayValue
                 for trackJSON in tracksJSON {
@@ -55,9 +58,14 @@ class AppleMusicFetcher: Fetcher {
     }
     
     static func getSearchHints(forTerm term: String, completionHandler: @escaping ([String]) -> Void) {
-        DispatchQueue.global(qos: .userInitiated).async {
-            let request = AppleMusicURLFactory.createSearchHintsRequest(forTerm: term)
-            
+        Task {
+            guard let request = await AppleMusicURLFactory.createSearchHintsRequest(forTerm: term) else {
+                DispatchQueue.main.async {
+                    completionHandler([])
+                }
+                return
+            }
+
             templateWebRequest(request) { (data, response, error) in
                 var hints = [String]()
                 let hintsJSON = try! JSON(data: data!)["results"]["terms"].arrayValue
@@ -163,11 +171,19 @@ class AppleMusicFetcher: Fetcher {
     func convert(libraryTracks: [Track], trackHandler: @escaping (Track) -> Void, errorHandler: @escaping (Int) -> Void) {
         let dispatchGroup = DispatchGroup()
         
-        DispatchQueue.global(qos: .userInitiated).async { [weak self] in
+        Task { [weak self] in
             var notFoundCount = 0
             
             for (i, libraryTrack) in libraryTracks.enumerated() {
-                let request = AppleMusicURLFactory.createSearchRequest(forTerm: libraryTrack.name + " " + libraryTrack.artist)
+                guard let request = await AppleMusicURLFactory.createSearchRequest(forTerm: libraryTrack.name + " " + libraryTrack.artist) else {
+                    notFoundCount += 1
+                    if i == libraryTracks.count - 1 {
+                        DispatchQueue.main.async {
+                            errorHandler(notFoundCount)
+                        }
+                    }
+                    continue
+                }
                 
                 dispatchGroup.enter()
                 let task = URLSession.shared.dataTask(with: request) { (data, response, _) in
@@ -204,8 +220,11 @@ class AppleMusicFetcher: Fetcher {
     }
     
     func getMostPlayed(completionHandler: @escaping () -> Void) {
-        DispatchQueue.global(qos: .userInitiated).async {
-            let request = AppleMusicURLFactory.createMostPlayedRequest()
+        Task { [weak self] in
+            guard let request = await AppleMusicURLFactory.createMostPlayedRequest() else {
+                completionHandler()
+                return
+            }
             
             AppleMusicFetcher.templateWebRequest(request) { [weak self] (data, response, _) in
                 let chartsJSON = try! JSON(data: data!)["results"]["songs"]

@@ -24,8 +24,11 @@ struct AppleMusicURLFactory {
         return urlRequest
     }
     
-    static func createSearchRequest(forTerm term: String) -> URLRequest {
-        if AppleMusicAuthorizationManager.developerToken == nil { AppleMusicAuthorizationManager.requestDeveloperToken() }
+    static func createSearchRequest(forTerm term: String) async -> URLRequest? {
+        guard let developerToken = await AppleMusicAuthorizationManager.ensureDeveloperToken(),
+              let storefront = Party.cookie else {
+            return nil
+        }
         
         let disallowedChars = CharacterSet(charactersIn: "()[],'.!?")
         let escapedTerm = term.components(separatedBy: disallowedChars).joined(separator: " ").replacedWhiteSpaceForURL
@@ -33,7 +36,7 @@ struct AppleMusicURLFactory {
         var urlComponents = URLComponents()
         urlComponents.scheme = "https"
         urlComponents.host = baseAppleMusicAPI
-        urlComponents.path = "/v1/catalog/\(Party.cookie!)/search"
+        urlComponents.path = "/v1/catalog/\(storefront)/search"
         
         let urlParameters = ["term": escapedTerm,
                              "types": "songs",
@@ -44,15 +47,18 @@ struct AppleMusicURLFactory {
         }
         urlComponents.queryItems = queryItems
         
-        var urlRequest = URLRequest(url: urlComponents.url!)
+        guard let url = urlComponents.url else { return nil }
+        var urlRequest = URLRequest(url: url)
         urlRequest.httpMethod = "GET"
-        urlRequest.addValue("Bearer \(AppleMusicAuthorizationManager.developerToken!)", forHTTPHeaderField: "Authorization")
+        urlRequest.addValue("Bearer \(developerToken)", forHTTPHeaderField: "Authorization")
         
         return urlRequest
     }
     
-    static func createSearchHintsRequest(forTerm term: String) -> URLRequest {
-        if AppleMusicAuthorizationManager.developerToken == nil { AppleMusicAuthorizationManager.requestDeveloperToken() }
+    static func createSearchHintsRequest(forTerm term: String) async -> URLRequest? {
+        guard let developerToken = await AppleMusicAuthorizationManager.ensureDeveloperToken() else {
+            return nil
+        }
         
         let disallowedChars = CharacterSet(charactersIn: "()[],'.!?")
         let escapedTerm = term.components(separatedBy: disallowedChars).joined(separator: " ").replacedWhiteSpaceForURL
@@ -71,35 +77,43 @@ struct AppleMusicURLFactory {
         }
         urlComponents.queryItems = queryItems
         
-        var urlRequest = URLRequest(url: urlComponents.url!)
+        guard let url = urlComponents.url else { return nil }
+        var urlRequest = URLRequest(url: url)
         urlRequest.httpMethod = "GET"
-        urlRequest.addValue("Bearer \(AppleMusicAuthorizationManager.developerToken!)", forHTTPHeaderField: "Authorization")
+        urlRequest.addValue("Bearer \(developerToken)", forHTTPHeaderField: "Authorization")
         
         return urlRequest
     }
     
-    static func createTrackRequest(forID id: String) -> URLRequest {
-        if AppleMusicAuthorizationManager.developerToken == nil { AppleMusicAuthorizationManager.requestDeveloperToken() }
+    static func createTrackRequest(forID id: String) async -> URLRequest? {
+        guard let developerToken = await AppleMusicAuthorizationManager.ensureDeveloperToken(),
+              let storefront = Party.cookie else {
+            return nil
+        }
         
         var urlComponents = URLComponents()
         urlComponents.scheme = "https"
         urlComponents.host = baseAppleMusicAPI
-        urlComponents.path = "/v1/catalog/\(Party.cookie!)/songs/\(id.components(separatedBy: ":")[1])"
+        urlComponents.path = "/v1/catalog/\(storefront)/songs/\(id.components(separatedBy: ":")[1])"
         
-        var urlRequest = URLRequest(url: urlComponents.url!)
+        guard let url = urlComponents.url else { return nil }
+        var urlRequest = URLRequest(url: url)
         urlRequest.httpMethod = "GET"
-        urlRequest.addValue("Bearer \(AppleMusicAuthorizationManager.developerToken!)", forHTTPHeaderField: "Authorization")
+        urlRequest.addValue("Bearer \(developerToken)", forHTTPHeaderField: "Authorization")
         
         return urlRequest
     }
     
-    static func createMostPlayedRequest() -> URLRequest {
-        if AppleMusicAuthorizationManager.developerToken == nil { AppleMusicAuthorizationManager.requestDeveloperToken() }
+    static func createMostPlayedRequest() async -> URLRequest? {
+        guard let developerToken = await AppleMusicAuthorizationManager.ensureDeveloperToken(),
+              let storefront = Party.cookie else {
+            return nil
+        }
         
         var urlComponents = URLComponents()
         urlComponents.scheme = "https"
         urlComponents.host = baseAppleMusicAPI
-        urlComponents.path = "/v1/catalog/\(Party.cookie!)/charts"
+        urlComponents.path = "/v1/catalog/\(storefront)/charts"
         
         let urlParameters = ["chart": "most-played",
                              "types": "songs",
@@ -110,9 +124,10 @@ struct AppleMusicURLFactory {
         }
         urlComponents.queryItems = queryItems
         
-        var urlRequest = URLRequest(url: urlComponents.url!)
+        guard let url = urlComponents.url else { return nil }
+        var urlRequest = URLRequest(url: url)
         urlRequest.httpMethod = "GET"
-        urlRequest.addValue("Bearer \(AppleMusicAuthorizationManager.developerToken!)", forHTTPHeaderField: "Authorization")
+        urlRequest.addValue("Bearer \(developerToken)", forHTTPHeaderField: "Authorization")
         
         return urlRequest
     }

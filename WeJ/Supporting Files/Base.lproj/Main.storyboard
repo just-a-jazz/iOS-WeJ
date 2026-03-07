@@ -484,12 +484,12 @@
                             <constraint firstItem="gAJ-PS-5zB" firstAttribute="bottom" secondItem="phr-p9-Mvw" secondAttribute="bottom" id="4qe-NZ-ZjS"/>
                             <constraint firstItem="gAJ-PS-5zB" firstAttribute="trailing" secondItem="phr-p9-Mvw" secondAttribute="trailing" id="BJ6-to-94e"/>
                             <constraint firstItem="phr-p9-Mvw" firstAttribute="top" secondItem="kYj-8e-FOB" secondAttribute="bottom" constant="10" id="Iho-Ky-4OI"/>
-                            <constraint firstAttribute="trailingMargin" secondItem="YGx-cb-qhQ" secondAttribute="trailing" constant="14" id="Lwq-GO-dcg"/>
+                            <constraint firstAttribute="trailingMargin" secondItem="YGx-cb-qhQ" secondAttribute="trailing" constant="4" id="Lwq-GO-dcg"/>
                             <constraint firstItem="YGx-cb-qhQ" firstAttribute="top" secondItem="gAJ-PS-5zB" secondAttribute="top" constant="16" id="SCq-bw-34j"/>
                             <constraint firstItem="kYj-8e-FOB" firstAttribute="leading" secondItem="gAJ-PS-5zB" secondAttribute="leading" constant="31" id="bsw-MX-O0O"/>
                             <constraint firstItem="kYj-8e-FOB" firstAttribute="top" secondItem="gAJ-PS-5zB" secondAttribute="top" constant="20" id="edc-LM-N05"/>
                             <constraint firstItem="vDq-NB-ESS" firstAttribute="centerY" secondItem="kYj-8e-FOB" secondAttribute="centerY" id="uoI-S6-FCE"/>
-                            <constraint firstItem="gAJ-PS-5zB" firstAttribute="trailing" secondItem="vDq-NB-ESS" secondAttribute="trailing" constant="30" id="wDB-3n-Nvd"/>
+                            <constraint firstItem="gAJ-PS-5zB" firstAttribute="trailing" secondItem="vDq-NB-ESS" secondAttribute="trailing" constant="20" id="wDB-3n-Nvd"/>
                         </constraints>
                     </view>
                     <connections>
@@ -1567,11 +1567,11 @@
             </objects>
             <point key="canvasLocation" x="530" y="79"/>
         </scene>
-        <!--My Hub-->
+        <!--My Music-->
         <scene sceneID="cgp-C2-6Hy">
             <objects>
                 <navigationController automaticallyAdjustsScrollViewInsets="NO" id="Uag-Xz-Qpz" sceneMemberID="viewController">
-                    <tabBarItem key="tabBarItem" title="My Hub" image="homeIcon" selectedImage="homeIcon" id="31z-Ms-yg7">
+                    <tabBarItem key="tabBarItem" title="My Music" image="homeIcon" selectedImage="homeIcon" id="31z-Ms-yg7">
                         <offsetWrapper key="titlePositionAdjustment" horizontal="0.0" vertical="-4"/>
                     </tabBarItem>
                     <toolbarItems/>

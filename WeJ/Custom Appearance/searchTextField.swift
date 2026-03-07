@@ -164,19 +164,19 @@ class searchTextField: UITextField, UITableViewDelegate, UITableViewDataSource {
         }
         
         latestTerm = text!
-        AppleMusicFetcher.getSearchHints(forTerm: text!) { [weak self] (hints) in
-            guard self != nil && self!.latestTerm == self!.text! else { return }
-            
-            self?.hintsList = hints
-            self?.hintsTableView.reloadData()
-            
-            if !hints.isEmpty {
-                self?.hintsTableView.scrollToRow(at: IndexPath(row: 0, section: 0), at: .top, animated: false)
-                self?.showHintsTableView()
-            } else {
-                self?.hideHintsTableView()
-            }
-        }
+//        AppleMusicFetcher.getSearchHints(forTerm: text!) { [weak self] (hints) in
+//            guard self != nil && self!.latestTerm == self!.text! else { return }
+//            
+//            self?.hintsList = hints
+//            self?.hintsTableView.reloadData()
+//            
+//            if !hints.isEmpty {
+//                self?.hintsTableView.scrollToRow(at: IndexPath(row: 0, section: 0), at: .top, animated: false)
+//                self?.showHintsTableView()
+//            } else {
+//                self?.hideHintsTableView()
+//            }
+//        }
     }
     
 }

@@ -37,6 +37,7 @@ class QueueViewController: UIViewController, UITableViewDelegate, UITableViewDat
     
     override func viewWillAppear(_ animated: Bool) {
         changeFontSizeForUpNext()
+        updateEditButtonForHeaderState()
     }
     
     private func adjustFontSizes() {
@@ -51,6 +52,14 @@ class QueueViewController: UIViewController, UITableViewDelegate, UITableViewDat
         tracksTableView.dataSource = self
     }
 
+    private func updateEditButtonForHeaderState() {
+        if headerHeightConstraint == maxHeight {
+            goIntoEditingMode()
+        } else if headerHeightConstraint == minHeight {
+            comeOutOfEditingMode()
+        }
+    }
+
     private func addUpNextSeparatorIfNeeded() {
         guard upNextSeparator == nil else { return }
 
@@ -60,7 +69,7 @@ class QueueViewController: UIViewController, UITableViewDelegate, UITableViewDat
         view.addSubview(separator)
 
         let guide = view.safeAreaLayoutGuide
-        let horizontalInset: CGFloat = 30
+        let horizontalInset: CGFloat = 20
 
         NSLayoutConstraint.activate([
             separator.topAnchor.constraint(equalTo: upNextLabel.bottomAnchor, constant: 10),
@@ -243,7 +252,8 @@ extension QueueViewController {
                     }
                 }
             }
-            animateEditButtonTitle(editButton, to: NSLocalizedString("Edit", comment: ""))
+            let targetTitle = tracksTableView.isEditing ? NSLocalizedString("Done", comment: "") : NSLocalizedString("Edit", comment: "")
+            animateEditButtonTitle(editButton, to: targetTitle)
         }
     }
     
@@ -350,7 +360,7 @@ extension QueueViewController {
             UserDefaults.standard.integer(forKey: "launchCount") > AppConstants.minimumLaunchesBeforeReview &&
                 !Party.tracksQueue.isEmpty &&
                 delegate!.connectedUsers > 0 {
-            SKStoreReviewController.requestReview()
+//            SKStoreReviewController.requestReview()
         }
     }
     

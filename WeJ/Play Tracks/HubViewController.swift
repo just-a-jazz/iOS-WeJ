@@ -63,7 +63,7 @@ class HubViewController: UIViewController, UITableViewDelegate, UITableViewDataS
         let horizontalInset: CGFloat = 20
 
         NSLayoutConstraint.activate([
-            separator.topAnchor.constraint(equalTo: titleLabel.bottomAnchor, constant: 13),
+            separator.topAnchor.constraint(equalTo: titleLabel.bottomAnchor, constant: 10),
             separator.leadingAnchor.constraint(equalTo: guide.leadingAnchor, constant: horizontalInset),
             separator.trailingAnchor.constraint(equalTo: guide.trailingAnchor, constant: -horizontalInset),
             separator.heightAnchor.constraint(equalToConstant: 1 / UIScreen.main.scale)

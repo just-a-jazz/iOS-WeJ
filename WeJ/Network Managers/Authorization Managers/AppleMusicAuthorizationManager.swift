@@ -7,39 +7,46 @@
 //
 
 import Foundation
+import MusicKit
+import UIKit
 import StoreKit
 
 protocol AuthorizationManager {
     func requestAuthorization()
 }
 
-class AppleMusicAuthorizationManager: NSObject, AuthorizationManager, URLSessionDelegate {
+class AppleMusicAuthorizationManager: NSObject, AuthorizationManager {
     
     static weak var delegate: ViewControllerAccessDelegate?
     
-    static let cloudServiceController = SKCloudServiceController()
     static var developerToken: String!
     static var storyboardSegue: String!
     
-    static func requestDeveloperToken() {
-        let request = AppleMusicURLFactory.createDeveloperTokenRequest()
-        let dispatchGroup = DispatchGroup()
-        dispatchGroup.enter()
-        
-        DispatchQueue.global(qos: .userInitiated).async {
-            
-            let session = URLSession(configuration: URLSessionConfiguration.default)
-            let task = session.dataTask(with: request) { (data, response, error) in
-                if let statusCode = (response as? HTTPURLResponse)?.statusCode, statusCode == 200 {
-                    developerToken = String(data: data!, encoding: .utf8)!
-                }
-                dispatchGroup.leave()
-            }
-            
-            task.resume()
+    static func requestDeveloperToken() async -> String? {
+        if !PrivateConfig.appleMusicDeveloperToken.isEmpty {
+            developerToken = PrivateConfig.appleMusicDeveloperToken
+            return developerToken
         }
-        
-        dispatchGroup.wait()
+
+        let request = AppleMusicURLFactory.createDeveloperTokenRequest()
+        do {
+            let (data, response) = try await URLSession.shared.data(for: request)
+            if let statusCode = (response as? HTTPURLResponse)?.statusCode,
+               statusCode == 200 {
+                developerToken = String(data: data, encoding: .utf8)
+            }
+        } catch {
+            developerToken = nil
+        }
+
+        return developerToken
+    }
+
+    static func ensureDeveloperToken() async -> String? {
+        if let token = developerToken, !token.isEmpty {
+            return token
+        }
+        return await requestDeveloperToken()
     }
     
 //    func urlSession(_ session: URLSession, didReceive challenge: URLAuthenticationChallenge, completionHandler: @escaping (URLSession.AuthChallengeDisposition, URLCredential?) -> Void) {
@@ -74,61 +81,63 @@ class AppleMusicAuthorizationManager: NSObject, AuthorizationManager, URLSession
     
     func requestAuthorization() {
         AppleMusicAuthorizationManager.delegate?.processingLogin = true
-        if SKCloudServiceController.authorizationStatus() == .authorized {
-            AppleMusicAuthorizationManager.handleCapabilities()
-        } else {
-            SKCloudServiceController.requestAuthorization { (status) in
-                if status == .authorized {
-                    AppleMusicAuthorizationManager.handleCapabilities()
-                } else {
-                    AppleMusicAuthorizationManager.postAlertForSettings()
+        Task {
+            let status = await MusicAuthorization.request()
+            if status == .authorized {
+                await AppleMusicAuthorizationManager.handleAuthorization()
+            } else {
+                AppleMusicAuthorizationManager.postAlertForSettings()
+                await MainActor.run {
                     AppleMusicAuthorizationManager.delegate?.processingLogin = false
                 }
             }
         }
     }
     
-    private static func handleCapabilities() {
+    private static func handleAuthorization() async {
         guard Party.cookie == nil else {
-            DispatchQueue.main.async {
+            await MainActor.run {
                 delegate?.performSegue(withIdentifier: storyboardSegue, sender: nil)
+                delegate?.processingLogin = false
             }
-            delegate?.processingLogin = false
             return
         }
         
-        AppleMusicAuthorizationManager.cloudServiceController.requestCapabilities { (capabilities, _) in
-            if capabilities.contains(.musicCatalogPlayback) {
-                AppleMusicAuthorizationManager.requestStorefrontIdentifier()
-            } else {
-                if capabilities.rawValue == 0 {
-                    AppleMusicAuthorizationManager.postAlertForInternet()
-                } else {
-                    AppleMusicAuthorizationManager.postAlertForAppleMusicSubscription()
+        do {
+            let subscription = try await MusicSubscription.current
+            guard subscription.canPlayCatalogContent else {
+                AppleMusicAuthorizationManager.postAlertForAppleMusicSubscription()
+                await MainActor.run {
+                    delegate?.processingLogin = false
                 }
+                return
+            }
+        } catch {
+            AppleMusicAuthorizationManager.postAlertForInternet()
+            await MainActor.run {
                 delegate?.processingLogin = false
             }
-        }
-    }
-    
-    static func requestStorefrontIdentifier() {
-        let countryCodeHandler: (String?, Error?) -> Void = { (countryCode, error) in
-            if let storefrontId = countryCode?.components(separatedBy: "-").first,
-                let countryCode = AppleMusicConstants.countryCodes[storefrontId] ?? countryCode {
-                Party.cookie = countryCode
-                DispatchQueue.main.async {
-                    delegate?.performSegue(withIdentifier: storyboardSegue, sender: nil)
-                }
-            } else {
-                postAlertForInternet()
-            }
-            delegate?.processingLogin = false
+            return
         }
         
-        if #available(iOS 11.0, *) {
-            cloudServiceController.requestStorefrontCountryCode(completionHandler: countryCodeHandler)
-        } else {
-            cloudServiceController.requestStorefrontIdentifier(completionHandler: countryCodeHandler)
+        await AppleMusicAuthorizationManager.requestStorefrontCountryCode()
+    }
+    
+    private static func requestStorefrontCountryCode() async {
+        let storefront = await Storefront.current
+        let storefrontID = storefront?.id
+        guard let storefrontID, !storefrontID.isEmpty else {
+            postAlertForInternet()
+            await MainActor.run {
+                delegate?.processingLogin = false
+            }
+            return
+        }
+
+        Party.cookie = storefrontID
+        await MainActor.run {
+            delegate?.performSegue(withIdentifier: storyboardSegue, sender: nil)
+            delegate?.processingLogin = false
         }
     }
     
