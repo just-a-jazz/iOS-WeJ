@@ -8,8 +8,9 @@
 
 import Foundation
 import MusicKit
-import UIKit
 import StoreKit
+import UIKit
+import MediaPlayer
 
 protocol AuthorizationManager {
     func requestAuthorization()
@@ -47,6 +48,18 @@ class AppleMusicAuthorizationManager: NSObject, AuthorizationManager {
             return token
         }
         return await requestDeveloperToken()
+    }
+
+    static func ensureMediaLibraryAccess(completionHandler: @escaping (Bool) -> Void) {
+        let status = MPMediaLibrary.authorizationStatus()
+        if status == .authorized {
+            completionHandler(true)
+            return
+        }
+
+        MPMediaLibrary.requestAuthorization { newStatus in
+            completionHandler(newStatus == .authorized)
+        }
     }
     
 //    func urlSession(_ session: URLSession, didReceive challenge: URLAuthenticationChallenge, completionHandler: @escaping (URLSession.AuthChallengeDisposition, URLCredential?) -> Void) {
@@ -124,9 +137,15 @@ class AppleMusicAuthorizationManager: NSObject, AuthorizationManager {
     }
     
     private static func requestStorefrontCountryCode() async {
-        let storefront = await Storefront.current
-        let storefrontID = storefront?.id
-        guard let storefrontID, !storefrontID.isEmpty else {
+        let controller = SKCloudServiceController()
+        let countryCode: String? = await withCheckedContinuation { continuation in
+            controller.requestStorefrontCountryCode { code, _ in
+                continuation.resume(returning: code)
+            }
+        }
+        
+        guard let storefrontID = countryCode?.lowercased(),
+              !storefrontID.isEmpty else {
             postAlertForInternet()
             await MainActor.run {
                 delegate?.processingLogin = false

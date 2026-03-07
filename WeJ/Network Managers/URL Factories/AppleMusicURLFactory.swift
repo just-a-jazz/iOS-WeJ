@@ -30,22 +30,19 @@ struct AppleMusicURLFactory {
             return nil
         }
         
-        let disallowedChars = CharacterSet(charactersIn: "()[],'.!?")
-        let escapedTerm = term.components(separatedBy: disallowedChars).joined(separator: " ").replacedWhiteSpaceForURL
+        let trimmedTerm = term.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmedTerm.isEmpty else { return nil }
         
         var urlComponents = URLComponents()
         urlComponents.scheme = "https"
         urlComponents.host = baseAppleMusicAPI
         urlComponents.path = "/v1/catalog/\(storefront)/search"
         
-        let urlParameters = ["term": escapedTerm,
-                             "types": "songs",
-                             "limit": "20"]
-        var queryItems = [URLQueryItem]()
-        for (key, value) in urlParameters {
-            queryItems.append(URLQueryItem(name: key, value: value))
-        }
-        urlComponents.queryItems = queryItems
+        urlComponents.queryItems = [
+            URLQueryItem(name: "term", value: trimmedTerm),
+            URLQueryItem(name: "types", value: "songs"),
+            URLQueryItem(name: "limit", value: "25")
+        ]
         
         guard let url = urlComponents.url else { return nil }
         var urlRequest = URLRequest(url: url)
@@ -95,34 +92,6 @@ struct AppleMusicURLFactory {
         urlComponents.scheme = "https"
         urlComponents.host = baseAppleMusicAPI
         urlComponents.path = "/v1/catalog/\(storefront)/songs/\(id.components(separatedBy: ":")[1])"
-        
-        guard let url = urlComponents.url else { return nil }
-        var urlRequest = URLRequest(url: url)
-        urlRequest.httpMethod = "GET"
-        urlRequest.addValue("Bearer \(developerToken)", forHTTPHeaderField: "Authorization")
-        
-        return urlRequest
-    }
-    
-    static func createMostPlayedRequest() async -> URLRequest? {
-        guard let developerToken = await AppleMusicAuthorizationManager.ensureDeveloperToken(),
-              let storefront = Party.cookie else {
-            return nil
-        }
-        
-        var urlComponents = URLComponents()
-        urlComponents.scheme = "https"
-        urlComponents.host = baseAppleMusicAPI
-        urlComponents.path = "/v1/catalog/\(storefront)/charts"
-        
-        let urlParameters = ["chart": "most-played",
-                             "types": "songs",
-                             "limit": "20"]
-        var queryItems = [URLQueryItem]()
-        for (key, value) in urlParameters {
-            queryItems.append(URLQueryItem(name: key, value: value))
-        }
-        urlComponents.queryItems = queryItems
         
         guard let url = urlComponents.url else { return nil }
         var urlRequest = URLRequest(url: url)

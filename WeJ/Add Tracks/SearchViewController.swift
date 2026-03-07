@@ -114,6 +114,7 @@ class SearchViewController: UIViewController, UITextFieldDelegate, SelectionCoun
     
     private func populateTracksList() {
         tracksList = fetcher.tracksList
+        print("Tracks List: \(tracksList)")
         DispatchQueue.main.async {
             if self.tracksList.isEmpty {
                 self.displayNoTracksLabel()

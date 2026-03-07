@@ -26,13 +26,17 @@ protocol Fetcher {
 class AppleMusicFetcher: Fetcher {
     
     var tracksList = [Track]()
-    
+
     private static var templateWebRequest: (URLRequest, @escaping (Data?, URLResponse?, Error?) -> Void) -> Void = { (request, completionHandler) in
         let task = URLSession.shared.dataTask(with: request) { (data, response, error) in
             if let statusCode = (response as? HTTPURLResponse)?.statusCode, statusCode == 200 {
                 completionHandler(data, response, error)
             } else if let statusCode = (response as? HTTPURLResponse)?.statusCode, statusCode == 401 {
+                print("Error 1: \(error?.localizedDescription ?? "No error description")")
                 AppleMusicAuthorizationManager.developerToken = nil
+            } else {
+                print("Error 2: \(error?.localizedDescription ?? "No error description")")
+                print(response.debugDescription)
             }
         }
         
@@ -48,6 +52,7 @@ class AppleMusicFetcher: Fetcher {
 
             AppleMusicFetcher.templateWebRequest(request) { [weak self] (data, response, _) in
                 let tracksJSON = try! JSON(data: data!)["results"]["songs"]["data"].arrayValue
+                print("Tracks JSON: \(tracksJSON)")
                 for trackJSON in tracksJSON {
                     guard self != nil else { return }
                     self!.tracksList.append(self!.parse(json: trackJSON))
@@ -80,7 +85,13 @@ class AppleMusicFetcher: Fetcher {
     }
     
     func getLibraryAlbums(atOffset offset: Int, withOptionsDict optionsDict: [String: [Option]], completionHandler: @escaping ([String : [Option]]) -> Void) {
-        DispatchQueue.global(qos: .userInitiated).async {
+        AppleMusicAuthorizationManager.ensureMediaLibraryAccess { authorized in
+            guard authorized else {
+                completionHandler([:])
+                return
+            }
+
+            DispatchQueue.global(qos: .userInitiated).async {
             let albums = MPMediaQuery.albums()
             albums.groupingType = .album
             let albumsList = albums.collections!
@@ -101,11 +112,18 @@ class AppleMusicFetcher: Fetcher {
             }
             
             completionHandler(optionsDict)
+            }
         }
     }
     
     func getLibraryArtists(completionHandler: @escaping ([String: [Option]]) -> Void) {
-        DispatchQueue.global(qos: .userInitiated).async {
+        AppleMusicAuthorizationManager.ensureMediaLibraryAccess { authorized in
+            guard authorized else {
+                completionHandler([:])
+                return
+            }
+
+            DispatchQueue.global(qos: .userInitiated).async {
             let artists = MPMediaQuery.artists()
             artists.groupingType = .artist
             let artistsList = artists.collections!
@@ -126,11 +144,18 @@ class AppleMusicFetcher: Fetcher {
             }
             
             completionHandler(optionsDict)
+            }
         }
     }
     
     func getLibraryPlaylists(completionHandler: @escaping ([String: [Option]]) -> Void) {
-        DispatchQueue.global(qos: .userInitiated).async {
+        AppleMusicAuthorizationManager.ensureMediaLibraryAccess { authorized in
+            guard authorized else {
+                completionHandler([:])
+                return
+            }
+
+            DispatchQueue.global(qos: .userInitiated).async {
             let playlists = MPMediaQuery.playlists()
             playlists.groupingType = .playlist
             let playlistsList = playlists.collections!
@@ -151,6 +176,7 @@ class AppleMusicFetcher: Fetcher {
             }
             
             completionHandler(optionsDict)
+            }
         }
     }
     
@@ -220,21 +246,17 @@ class AppleMusicFetcher: Fetcher {
     }
     
     func getMostPlayed(completionHandler: @escaping () -> Void) {
-        Task { [weak self] in
-            guard let request = await AppleMusicURLFactory.createMostPlayedRequest() else {
+        AppleMusicAuthorizationManager.ensureMediaLibraryAccess { [weak self] authorized in
+            guard authorized else {
                 completionHandler()
                 return
             }
             
-            AppleMusicFetcher.templateWebRequest(request) { [weak self] (data, response, _) in
-                let chartsJSON = try! JSON(data: data!)["results"]["songs"]
-                if !chartsJSON.arrayValue.isEmpty {
-                    let tracksJSON = chartsJSON.arrayValue[0]["data"].arrayValue
-                    for trackJSON in tracksJSON {
-                        guard self != nil else { return }
-                        self!.tracksList.append(self!.parse(json: trackJSON))
-                    }
-                }
+            DispatchQueue.global(qos: .userInitiated).async {
+                let items = MPMediaQuery.songs().items ?? []
+                let sortedItems = items.sorted { $0.playCount > $1.playCount }
+                let topItems = Array(sortedItems.prefix(50))
+                self?.tracksList = Track.convert(tracks: topItems)
                 completionHandler()
             }
         }

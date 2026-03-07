@@ -149,6 +149,23 @@ class MusicLibrarySelectionViewController: UIViewController, ViewControllerAcces
     }
     
     private func loadMostPlayed(reset: Bool) {
+        if libraryMusicService == .spotify {
+            loadSpotifyMostPlayed(reset: reset)
+        } else {
+            loadAppleMusicMostPlayed()
+        }
+    }
+
+    private func loadAppleMusicMostPlayed() {
+        isLoadingMostPlayed = true
+        fetcher.getMostPlayed { [weak self] in
+            guard let self = self else { return }
+            self.tracksList = self.fetcher.tracksList
+            self.isLoadingMostPlayed = false
+        }
+    }
+    
+    private func loadSpotifyMostPlayed(reset: Bool) {
         guard let fetcher = fetcher as? SpotifyFetcher else { return }
         if reset {
             fetcher.tracksList.removeAll()
