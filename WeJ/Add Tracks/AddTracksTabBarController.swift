@@ -158,7 +158,12 @@ class AddTracksTabBarController: UITabBarController, UITabBarControllerDelegate,
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         let cell = tableView.cellForRow(at: indexPath)!
         
-        addToQueue(track: tracksList[indexPath.row])
+        let track = tracksList[indexPath.row]
+        if isAppleMusicLibrarySelection(for: tableView) {
+            addToLibraryQueue(track: track)
+        } else {
+            addToQueue(track: track)
+        }
         UIView.animate(withDuration: 0.35) {
             cell.accessoryType = .checkmark
         }
@@ -172,7 +177,12 @@ class AddTracksTabBarController: UITabBarController, UITabBarControllerDelegate,
     
     func tableView(_ tableView: UITableView, didDeselectRowAt indexPath: IndexPath) {
         let cell = tableView.cellForRow(at: indexPath)!
-        removeFromQueue(track: tracksList[indexPath.row])
+        let track = tracksList[indexPath.row]
+        if isAppleMusicLibrarySelection(for: tableView) {
+            removeFromLibraryQueue(track: track)
+        } else {
+            removeFromQueue(track: track)
+        }
         
         if !Party.tracksQueue(hasTrack: tracksList[indexPath.row]) {
             UIView.animate(withDuration: 0.35) {
@@ -180,11 +190,27 @@ class AddTracksTabBarController: UITabBarController, UITabBarControllerDelegate,
             }
         }
     }
-    
+
     private func removeFromQueue(track: Track) {
         if let index = tracksSelected.index(where: {$0.id == track.id}) {
             tracksSelected.remove(at: index)
         }
+    }
+
+    private func addToLibraryQueue(track: Track) {
+        if !libraryTracksSelected.contains(where: { $0.id == track.id }) {
+            libraryTracksSelected.append(track)
+        }
+    }
+
+    private func removeFromLibraryQueue(track: Track) {
+        if let index = libraryTracksSelected.index(where: { $0.id == track.id }) {
+            libraryTracksSelected.remove(at: index)
+        }
+    }
+
+    private func isAppleMusicLibrarySelection(for tableView: UITableView) -> Bool {
+        return Party.musicService == .appleMusic && tableView == myHubController.tracksTableView
     }
 
 }
