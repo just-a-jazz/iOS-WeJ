@@ -22,6 +22,7 @@ class Track: NSObject, NSCoding, NSCopying {
     var highResArtwork: UIImage?
     
     var length: TimeInterval?
+    var isFromLibrary = false
     
     func fetchImage(fromURL urlString: String, completionHandler: @escaping (UIImage?) -> Void) {
         let errorHandler: () -> Void = {
@@ -64,6 +65,8 @@ class Track: NSObject, NSCoding, NSCopying {
             newTrack.name = track.title ?? ""
             newTrack.artist = track.artist ?? ""
             newTrack.lowResArtwork = track.artwork?.image(at: CGSize(width: 60, height: 60)) ?? #imageLiteral(resourceName: "stockArtwork")
+            newTrack.highResArtwork = track.artwork?.image(at: CGSize(width: 400, height: 400))
+            newTrack.isFromLibrary = true
             
             newTracks.append(newTrack)
         }
@@ -80,6 +83,7 @@ class Track: NSObject, NSCoding, NSCopying {
         aCoder.encode(highResArtworkURL, forKey: "highResArtworkURL")
         aCoder.encode(highResArtwork, forKey: "highResArtwork")
         aCoder.encode(length, forKey: "length")
+        aCoder.encode(isFromLibrary, forKey: "isFromLibrary")
     }
     
     convenience required init?(coder aDecoder: NSCoder) {
@@ -91,6 +95,7 @@ class Track: NSObject, NSCoding, NSCopying {
         let highResArtworkURL = aDecoder.decodeObject(forKey: "highResArtworkURL") as! String
         let highResArtwork = aDecoder.decodeObject(forKey: "highResArtwork") as? UIImage
         let length = aDecoder.decodeObject(forKey: "length") as? TimeInterval
+        let isFromLibrary = aDecoder.decodeBool(forKey: "isFromLibrary")
         
         self.init()
         
@@ -102,6 +107,7 @@ class Track: NSObject, NSCoding, NSCopying {
         self.highResArtworkURL = highResArtworkURL
         self.highResArtwork = highResArtwork
         self.length = length
+        self.isFromLibrary = isFromLibrary
     }
     
     func copy(with zone: NSZone? = nil) -> Any {
@@ -116,6 +122,7 @@ class Track: NSObject, NSCoding, NSCopying {
         copy.highResArtwork = highResArtwork
         
         copy.length = length
+        copy.isFromLibrary = isFromLibrary
         return copy
     }
 }

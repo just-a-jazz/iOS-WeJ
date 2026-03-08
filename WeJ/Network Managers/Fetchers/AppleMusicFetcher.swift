@@ -8,6 +8,7 @@
 
 import Foundation
 import MediaPlayer
+import MusicKit
 import SwiftyJSON
 
 protocol Fetcher {
@@ -45,20 +46,49 @@ class AppleMusicFetcher: Fetcher {
     
     func searchCatalog(forTerm term: String, completionHandler: @escaping () -> Void) {
         Task { [weak self] in
-            guard let request = await AppleMusicURLFactory.createSearchRequest(forTerm: term) else {
-                completionHandler()
-                return
-            }
-
-            AppleMusicFetcher.templateWebRequest(request) { [weak self] (data, response, _) in
-                let tracksJSON = try! JSON(data: data!)["results"]["songs"]["data"].arrayValue
-                print("Tracks JSON: \(tracksJSON)")
-                for trackJSON in tracksJSON {
-                    guard self != nil else { return }
-                    self!.tracksList.append(self!.parse(json: trackJSON))
+            let developerToken = await AppleMusicAuthorizationManager.requestDeveloperToken()
+            
+            if developerToken != nil {
+                if let tracks = await self?.fetchCatalogTracksWithRestApi(forTerm: term) {
+                    self?.tracksList.append(contentsOf: tracks)
                 }
-                completionHandler()
+            } else {
+                // Web server didn't respond with a token, so use the MusicKit API
+                if let tracks = await self?.fetchCatalogTracksWithMusicKit(forTerm: term, limit: 25) {
+                    self?.tracksList.append(contentsOf: tracks)
+                }
             }
+            completionHandler()
+        }
+    }
+    
+    private func fetchCatalogTracksWithRestApi(forTerm term: String, limit: Int = 25) async -> [Track] {
+        guard let request = await AppleMusicURLFactory.createSearchRequest(forTerm: term) else {
+            return []
+        }
+        
+        do {
+            let (data, response) = try await URLSession.shared.data(for: request)
+            if let statusCode = (response as? HTTPURLResponse)?.statusCode, statusCode == 200 {
+                let tracksJSON = try JSON(data: data)["results"]["songs"]["data"].arrayValue
+                return tracksJSON.prefix(limit).map { parse(json: $0) }
+            }
+        } catch {
+            return []
+        }
+        
+        return []
+    }
+
+    private func fetchCatalogTracksWithMusicKit(forTerm term: String, limit: Int) async -> [Track] {
+        do {
+            var request = MusicCatalogSearchRequest(term: term, types: [Song.self])
+            request.limit = limit
+            let response = try await request.response()
+            return response.songs.map { parse(song: $0) }
+        } catch {
+            print("Apple Music MusicKit search failed: \(error.localizedDescription)")
+            return []
         }
     }
     
@@ -195,52 +225,35 @@ class AppleMusicFetcher: Fetcher {
     }
     
     func convert(libraryTracks: [Track], trackHandler: @escaping (Track) -> Void, errorHandler: @escaping (Int) -> Void) {
-        let dispatchGroup = DispatchGroup()
-        
         Task { [weak self] in
-            var notFoundCount = 0
+            let developerToken = await AppleMusicAuthorizationManager.requestDeveloperToken()
             
-            for (i, libraryTrack) in libraryTracks.enumerated() {
-                guard let request = await AppleMusicURLFactory.createSearchRequest(forTerm: libraryTrack.name + " " + libraryTrack.artist) else {
-                    notFoundCount += 1
-                    if i == libraryTracks.count - 1 {
-                        DispatchQueue.main.async {
-                            errorHandler(notFoundCount)
-                        }
-                    }
-                    continue
+            for (_, libraryTrack) in libraryTracks.enumerated() {
+                let query = libraryTrack.name + " " + libraryTrack.artist
+                var foundTrack: Track?
+
+                if developerToken != nil {
+                    foundTrack = await self?.fetchCatalogTracksWithRestApi(forTerm: query, limit: 1).first
                 }
-                
-                dispatchGroup.enter()
-                let task = URLSession.shared.dataTask(with: request) { (data, response, _) in
-                    if let statusCode = (response as? HTTPURLResponse)?.statusCode, statusCode == 200 {
-                        let tracksJSON = try! JSON(data: data!)["results"]["songs"]["data"].arrayValue
-                        guard self != nil else { return }
-                        
-                        if !tracksJSON.isEmpty {
-                            let track = self!.parse(json: tracksJSON[0])
-                            if !Party.tracksQueue(hasTrack: track) {
-                                DispatchQueue.main.async {
-                                    trackHandler(track)
-                                }
-                            }
-                        } else {
-                            notFoundCount += 1
-                        }
-                    } else {
-                        notFoundCount += 1
-                    }
-                    
-                    if i == libraryTracks.count - 1 {
-                        DispatchQueue.main.async {
-                            errorHandler(notFoundCount)
-                        }
-                    }
-                    dispatchGroup.leave()
+
+                if foundTrack == nil {
+                    foundTrack = await self?.fetchCatalogTracksWithMusicKit(forTerm: query, limit: 1).first
                 }
-                
-                task.resume()
-                dispatchGroup.wait()
+
+                if let track = foundTrack {
+                    if !Party.tracksQueue(hasTrack: track) {
+                        await MainActor.run {
+                            trackHandler(track)
+                        }
+                    }
+                } else {
+                    // Use the library track directly if a track from was not found through Apple Music's APIs
+                    if !Party.tracksQueue(hasTrack: libraryTrack) {
+                        await MainActor.run {
+                            trackHandler(libraryTrack)
+                        }
+                    }
+                }
             }
         }
     }
@@ -281,6 +294,28 @@ class AppleMusicFetcher: Fetcher {
         track.highResArtworkURL = getImageURL(fromURL: attributes["artwork"]["url"].stringValue, withSize: "400")
         track.length = TimeInterval(attributes["durationInMillis"].doubleValue / 1000)
         
+        return track
+    }
+    
+    private func parse(song: Song) -> Track {
+        let track = Track()
+        track.id = song.id.rawValue
+        track.name = song.title
+        track.artist = song.artistName
+
+        if let artwork = song.artwork {
+            if let lowResURL = artwork.url(width: 60, height: 60) {
+                track.lowResArtworkURL = lowResURL.absoluteString
+            }
+            if let highResURL = artwork.url(width: 400, height: 400) {
+                track.highResArtworkURL = highResURL.absoluteString
+            }
+        }
+
+        if let duration = song.duration {
+            track.length = TimeInterval(duration)
+        }
+
         return track
     }
     

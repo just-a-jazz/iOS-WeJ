@@ -394,8 +394,10 @@ class PartyViewController: UIViewController, MusicPlayerDelegate, UpdatePartyDel
     private func removeImages(fromTracks tracks: [Track]) -> [Track] {
         return tracks.map { track in
             let newTrack = track.copy() as! Track
-            newTrack.lowResArtwork = nil
-            newTrack.highResArtwork = nil
+            if !newTrack.isFromLibrary {
+                newTrack.lowResArtwork = nil
+                newTrack.highResArtwork = nil
+            }
             return newTrack
         }
     }

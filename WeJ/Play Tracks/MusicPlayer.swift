@@ -90,13 +90,29 @@ class MusicPlayer: NSObject, SPTAppRemoteDelegate, SPTAppRemotePlayerStateDelega
     
     private func startAppleMusicPlayer(withTracks tracks: [Track]) {
         if !tracks.isEmpty {
-            appleMusicPlayer.setQueue(with: [tracks[0].id])
+            if tracks.allSatisfy({ $0.isFromLibrary }) {
+                let mediaItems = appleMusicLibraryItems(forTracks: tracks)
+                if !mediaItems.isEmpty {
+                    appleMusicPlayer.setQueue(with: MPMediaItemCollection(items: mediaItems))
+                } else {
+                    appleMusicPlayer.setQueue(with: [tracks[0].id])
+                }
+            } else {
+                appleMusicPlayer.setQueue(with: [tracks[0].id])
+            }
             playTrack()
         } else if BackgroundTask.isPlaying {
             BackgroundTask.stopBackgroundTask()
             appleMusicPlayer.setQueue(with: [])
             appleMusicPlayer.stop()
         }
+    }
+
+    private func appleMusicLibraryItems(forTracks tracks: [Track]) -> [MPMediaItem] {
+        let ids = Set(tracks.compactMap { UInt64($0.id) })
+        guard !ids.isEmpty else { return [] }
+        let items = MPMediaQuery.songs().items ?? []
+        return items.filter { ids.contains($0.persistentID) }
     }
     
     func playTrack() {
