@@ -105,6 +105,8 @@ class PartyViewController: UIViewController, MusicPlayerDelegate, UpdatePartyDel
     var personalQueue = Set<Track>()
     var cache = [String: Track]()
     private var lastQueueAdvanceAt: Date?
+    private var lastManualAppleMusicSkipAt: Date?
+    private var pendingAppleMusicUIWorkItem: DispatchWorkItem?
     
     // MARK: - Lifecycle
     
@@ -131,6 +133,7 @@ class PartyViewController: UIViewController, MusicPlayerDelegate, UpdatePartyDel
         if isHost {
             musicPlayer.exitPlayer()
         }
+        NotificationCenter.default.removeObserver(self)
     }
     
     // MARK: - General Functions
@@ -161,6 +164,17 @@ class PartyViewController: UIViewController, MusicPlayerDelegate, UpdatePartyDel
         initializeCommandCenter()
         setupControlEvents()
         musicPlayer.preparePlayer()
+
+        if Party.musicService == .appleMusic {
+            NotificationCenter.default.addObserver(self,
+                                                   selector: #selector(appleMusicPlaybackStateDidChange),
+                                                   name: .MPMusicPlayerControllerPlaybackStateDidChange,
+                                                   object: musicPlayer.appleMusicPlayer)
+            NotificationCenter.default.addObserver(self,
+                                                   selector: #selector(appleMusicNowPlayingItemDidChangeForUI),
+                                                   name: .MPMusicPlayerControllerNowPlayingItemDidChange,
+                                                   object: musicPlayer.appleMusicPlayer)
+        }
     }
     
     private func initializeStatusIndicatorView() {
@@ -184,13 +198,7 @@ class PartyViewController: UIViewController, MusicPlayerDelegate, UpdatePartyDel
             if let position = musicPlayer.currentPosition {
                 networkManager?.advertise(position: position)
             }
-            if musicPlayer.isPaused && Party.musicService == .appleMusic {
-                changeToPlayButton(animated: false)
-                BackgroundTask.stopBackgroundTask()
-            } else if Party.musicService == .appleMusic {
-                changeToPauseButton(animated: false)
-                BackgroundTask.startBackgroundTask()
-            } else if Party.musicService == .spotify {
+            if Party.musicService == .spotify {
                 if musicPlayer.isPaused {
                     changeToPlayButton(animated: false)
                 } else {
@@ -298,11 +306,13 @@ class PartyViewController: UIViewController, MusicPlayerDelegate, UpdatePartyDel
     
     func updateEveryonesTableView() {
         // Update own table view
-        hubAndQueueVC?.updateTable()
-        fetchArtwork(forHighRes: false)
-        fetchArtwork(forHighRes: true)
-        updateCurrentlyPlayingTrack()
-        
+        DispatchQueue.main.async { [weak self] in
+            self?.hubAndQueueVC?.updateTable()
+            self?.fetchArtwork(forHighRes: false)
+            self?.fetchArtwork(forHighRes: true)
+            self?.updateCurrentlyPlayingTrack()
+        }
+
         // Update peers tableview
         if isHost {
             sendTracksToPeers(forTracks: Party.tracksQueue)
@@ -330,7 +340,9 @@ class PartyViewController: UIViewController, MusicPlayerDelegate, UpdatePartyDel
         track.fetchImage(fromURL: track.highResArtworkURL) { [weak self, weak track] (image) in
             track?.highResArtwork = image
             if !Party.tracksQueue.isEmpty && track == Party.tracksQueue[0] {
-                self?.currentlyPlayingArtwork.image = track?.highResArtwork?.addGradient()
+                DispatchQueue.main.async { [weak self] in
+                    self?.currentlyPlayingArtwork.image = track?.highResArtwork?.addGradient()
+                }
             }
         }
     }
@@ -338,7 +350,9 @@ class PartyViewController: UIViewController, MusicPlayerDelegate, UpdatePartyDel
     private func fetchLowResArtwork(forTrack track: Track) {
         track.fetchImage(fromURL: track.lowResArtworkURL) { [weak self, weak track] (image) in
             track?.lowResArtwork = image
-            self?.hubAndQueueVC?.updateTable()
+            DispatchQueue.main.async { [weak self] in
+                self?.hubAndQueueVC?.updateTable()
+            }
         }
     }
     
@@ -497,9 +511,74 @@ class PartyViewController: UIViewController, MusicPlayerDelegate, UpdatePartyDel
     
     @IBAction func skipTrack() {
         if !Party.tracksQueue.isEmpty {
+            if Party.musicService == .appleMusic {
+                lastManualAppleMusicSkipAt = Date()
+            }
+            if Party.musicService == .appleMusic && !musicPlayer.isPaused {
+                changeToPauseButton(animated: false)
+            }
             sendTracksToPeers(forTracks: [Party.tracksQueue.removeFirst()], toRemove: true)
             musicPlayer.startPlayer()
             lastQueueAdvanceAt = Date.now
+        }
+    }
+
+    @objc private func appleMusicPlaybackStateDidChange() {
+        guard Party.musicService == .appleMusic else { return }
+
+        if let lastSkipAt = lastManualAppleMusicSkipAt,
+           Date.now.timeIntervalSince(lastSkipAt) < 0.6,
+           musicPlayer.appleMusicPlayer.playbackState != .playing {
+            return
+        }
+
+        pendingAppleMusicUIWorkItem?.cancel()
+
+        // Keep the button in "pause" when playback is actively running.
+        if musicPlayer.appleMusicPlayer.playbackState == .playing {
+            DispatchQueue.main.async { [weak self] in
+                guard let self else { return }
+                self.changeToPauseButton(animated: false)
+                BackgroundTask.startBackgroundTask()
+            }
+            return
+        }
+
+        // If we're between tracks (queue still has items), wait briefly before showing "play".
+        if !Party.tracksQueue.isEmpty {
+            let workItem = DispatchWorkItem { [weak self] in
+                guard let self else { return }
+                guard self.musicPlayer.isPaused else { return }
+                self.changeToPlayButton(animated: false)
+                BackgroundTask.stopBackgroundTask()
+            }
+            pendingAppleMusicUIWorkItem = workItem
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.25, execute: workItem)
+            return
+        }
+
+        // For an empty queue, reflect the player's paused/playing state immediately.
+        DispatchQueue.main.async { [weak self] in
+            guard let self else { return }
+            if self.musicPlayer.isPaused {
+                self.changeToPlayButton(animated: false)
+                BackgroundTask.stopBackgroundTask()
+            } else {
+                self.changeToPauseButton(animated: false)
+                BackgroundTask.startBackgroundTask()
+            }
+        }
+    }
+
+    @objc private func appleMusicNowPlayingItemDidChangeForUI() {
+        guard Party.musicService == .appleMusic else { return }
+        guard !Party.tracksQueue.isEmpty else { return }
+
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) { [weak self] in
+            guard let self else { return }
+            guard !self.musicPlayer.isPaused else { return }
+            self.changeToPauseButton(animated: false)
+            BackgroundTask.startBackgroundTask()
         }
     }
     
