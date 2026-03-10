@@ -106,6 +106,7 @@ class PartyViewController: UIViewController, MusicPlayerDelegate, UpdatePartyDel
     var cache = [String: Track]()
     private var lastQueueAdvanceAt: Date?
     private var lastManualAppleMusicSkipAt: Date?
+    private var lastQueueStartAt: Date?
     private var pendingAppleMusicUIWorkItem: DispatchWorkItem?
     
     // MARK: - Lifecycle
@@ -214,6 +215,12 @@ class PartyViewController: UIViewController, MusicPlayerDelegate, UpdatePartyDel
         guard isHost,
               !Party.tracksQueue.isEmpty,
               let currentURI = musicPlayer.currentTrackURI else {
+            return
+        }
+
+        // Skip sync for a short window after starting playback to avoid skipping the first queued track.
+        if let lastStart = lastQueueStartAt,
+           Date.now.timeIntervalSince(lastStart) < 1.5 {
             return
         }
         
@@ -435,6 +442,7 @@ class PartyViewController: UIViewController, MusicPlayerDelegate, UpdatePartyDel
             Party.tracksQueue.append(contentsOf: getCacheOptimizedTracks(fromTracks: tracksReceived))
             if Party.tracksQueue.count == tracksReceived.count {
                 musicPlayer.startPlayer()
+                lastQueueStartAt = Date.now
             }
         } else {
             Party.tracksQueue = getCacheOptimizedTracks(fromTracks: tracksReceived)
@@ -621,6 +629,7 @@ class PartyViewController: UIViewController, MusicPlayerDelegate, UpdatePartyDel
         
         if Party.tracksQueue.count == tracks.count && isHost {
             musicPlayer.startPlayer()
+            lastQueueStartAt = Date.now
         }
     }
     
