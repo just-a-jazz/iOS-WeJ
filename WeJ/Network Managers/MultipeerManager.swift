@@ -266,7 +266,15 @@ extension MultipeerManager: MCSessionDelegate {
     }
     
     func session(_ session: MCSession, didReceive data: Data, fromPeer peerID: MCPeerID) {
-        let unarchivedData = try? NSKeyedUnarchiver.unarchivedObject(ofClass: Party.self, from: data)
+        let unarchivedData: Any?
+        do {
+            let unarchiver = try NSKeyedUnarchiver(forReadingFrom: data)
+            unarchiver.requiresSecureCoding = false
+            unarchivedData = unarchiver.decodeObject(forKey: NSKeyedArchiveRootObjectKey)
+        } catch {
+            print("Failed to unarchive multipeer payload: \(error)")
+            unarchivedData = nil
+        }
         
         if let party = unarchivedData as? Party {
             delegate?.setup(withParty: party)
