@@ -48,6 +48,12 @@
 	<string>WeJ requires access to play Apple Music tracks and show you your library</string>
 	<key>NSBluetoothPeripheralUsageDescription</key>
 	<string>Nearby uses the microphone is used to find nearby devices</string>
+	<key>NSBonjourServices</key>
+	<array>
+		<string>_local-party._tcp</string>
+	</array>
+	<key>NSLocalNetworkUsageDescription</key>
+	<string>WeJ uses your local network to discover and join nearby parties.</string>
 	<key>LSApplicationQueriesSchemes</key>
     <array>
       <string>spotify</string>
