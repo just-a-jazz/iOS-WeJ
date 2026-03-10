@@ -15,7 +15,7 @@ class AddTracksTabBarController: UITabBarController, UITabBarControllerDelegate,
     
     fileprivate let minHeight: CGFloat = 280
     fileprivate var maxHeight: CGFloat {
-        let safeAreaTop = UIApplication.shared.keyWindow?.safeAreaInsets.top ?? 0
+        let safeAreaTop = view.window?.safeAreaInsets.top ?? view.safeAreaInsets.top
         let baseOffset: CGFloat = safeAreaTop >= 40 ? 70 : 45
         return safeAreaTop - baseOffset
     }

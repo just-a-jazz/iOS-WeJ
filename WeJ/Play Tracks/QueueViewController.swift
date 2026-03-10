@@ -161,15 +161,16 @@ class QueueViewController: UIViewController, UITableViewDelegate, UITableViewDat
         return Party.tracksQueue.remove(at: index)
     }
     
-    func tableView(_ tableView: UITableView, editActionsForRowAt indexPath: IndexPath) -> [UITableViewRowAction]? {
-        let deleteButton = UITableViewRowAction(style: .default, title: NSLocalizedString("Remove", comment: "")) { (_, indexPath) in
+    func tableView(_ tableView: UITableView, trailingSwipeActionsConfigurationForRowAt indexPath: IndexPath) -> UISwipeActionsConfiguration? {
+        let deleteAction = UIContextualAction(style: .destructive, title: NSLocalizedString("Remove", comment: "")) { _, _, completion in
             tableView.dataSource?.tableView?(
                 tableView,
                 commit: .delete,
                 forRowAt: indexPath
             )
+            completion(true)
         }
-        return [deleteButton]
+        return UISwipeActionsConfiguration(actions: [deleteAction])
     }
     
 }

@@ -254,7 +254,7 @@ class SpotifyAuthorizationManager: NSObject, AuthorizationManager, SPTSessionMan
     }
     
     private func processTokenResponse(data: Data?, error: Error?, fallbackRefreshToken: String?, notifyOnError: Bool) -> WebTokenResponse? {
-        if let error = error as NSError? {
+        if let _ = error as NSError? {
             SpotifyAuthorizationManager.postAlertForInternet()
             return nil
         }
@@ -264,7 +264,6 @@ class SpotifyAuthorizationManager: NSObject, AuthorizationManager, SPTSessionMan
     }
     
     private func parseWebTokenResponse(data: Data, fallbackRefreshToken: String?) -> WebTokenResponse? {
-        let json = (try? JSONSerialization.jsonObject(with: data)) as? [String: Any]
         guard let json = (try? JSONSerialization.jsonObject(with: data)) as? [String: Any],
               let accessToken = json["access_token"] as? String,
               let expiresIn = json["expires_in"] as? Double else {

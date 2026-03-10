@@ -34,7 +34,7 @@ class BackgroundTask {
     
     @objc static func interuptedAudio(_ notification: Notification) {
         if notification.name == NSNotification.Name.AVAudioSessionInterruption && notification.userInfo != nil {
-            var info = notification.userInfo!
+            let info = notification.userInfo!
             var intValue = 0
             (info[AVAudioSessionInterruptionTypeKey]! as AnyObject).getValue(&intValue)
             if intValue == 1 { playAudio() }

@@ -99,7 +99,10 @@ class MultipeerManager: NSObject {
             DispatchQueue.global(qos: .userInitiated).async { [weak self] in
                 guard self != nil && position == self!.latestPosition else { return }
                 
-                let positionData = NSKeyedArchiver.archivedData(withRootObject: position)
+                guard let positionData = try? NSKeyedArchiver.archivedData(withRootObject: position, requiringSecureCoding: false) else {
+                    print("Failed to archive position for multipeer send.")
+                    return
+                }
                 sessionsSnapshot.values.forEach {
                     try? $0.session.send(positionData, toPeers: $0.session.connectedPeers, with: .reliable)
                 }
@@ -116,7 +119,10 @@ class MultipeerManager: NSObject {
             DispatchQueue.global(qos: .userInitiated).async { [weak self] in
                 guard self != nil && (isRemoval || tracks == self!.latestRequest) else { return }
                 
-                let tracksListData = NSKeyedArchiver.archivedData(withRootObject: tracks)
+                guard let tracksListData = try? NSKeyedArchiver.archivedData(withRootObject: tracks, requiringSecureCoding: false) else {
+                    print("Failed to archive tracks for multipeer send.")
+                    return
+                }
                 sessionsSnapshot.values.forEach {
                     guard let self = self else { return }
                     if (try? $0.session.send(tracksListData, toPeers: $0.session.connectedPeers, with: .reliable)) == nil && !self.isHost {
@@ -139,7 +145,10 @@ class MultipeerManager: NSObject {
     func sendPartyInfo(toSession session: MCSession) {
         let hasSessions = sessionsQueue.sync { !sessions.isEmpty }
         if hasSessions && delegate != nil {
-            let partyData = NSKeyedArchiver.archivedData(withRootObject: Party())
+            guard let partyData = try? NSKeyedArchiver.archivedData(withRootObject: Party(), requiringSecureCoding: false) else {
+                print("Failed to archive party info for multipeer send.")
+                return
+            }
             try? session.send(partyData, toPeers: session.connectedPeers, with: .reliable)
         }
     }
@@ -257,7 +266,7 @@ extension MultipeerManager: MCSessionDelegate {
     }
     
     func session(_ session: MCSession, didReceive data: Data, fromPeer peerID: MCPeerID) {
-        let unarchivedData = NSKeyedUnarchiver.unarchiveObject(with: data)
+        let unarchivedData = try? NSKeyedUnarchiver.unarchivedObject(ofClass: Party.self, from: data)
         
         if let party = unarchivedData as? Party {
             delegate?.setup(withParty: party)

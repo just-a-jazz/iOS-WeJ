@@ -15,7 +15,8 @@ extension PartyViewController {
         view.layoutSubviews()
         UIView.animate(withDuration: 1) {
             if #available(iOS 11.0, *), UIDevice.deviceType == .iPhoneX {
-                self.alertViewConstraint.constant = -(UIApplication.shared.keyWindow?.safeAreaInsets.bottom)!
+                let bottomInset = self.view.window?.safeAreaInsets.bottom ?? self.view.safeAreaInsets.bottom
+                self.alertViewConstraint.constant = -bottomInset
             } else {
                 self.alertViewConstraint.constant = -34
             }
