@@ -11,6 +11,7 @@ import UIKit
 class searchTextField: UITextField, UITableViewDelegate, UITableViewDataSource {
     
     private let searchIconView = UIImageView(frame: CGRect(x: 0, y: 0, width: 17, height: 17))
+    private let bottomBorder = CALayer()
     
     private var closeButtonBar: UIToolbar!
     private var hintsTableView: UITableView!
@@ -33,11 +34,10 @@ class searchTextField: UITextField, UITableViewDelegate, UITableViewDataSource {
     }
     
     private func addBottomBorder() {
-        let bottomLine = CALayer()
-        bottomLine.frame = CGRect(x: 0, y: frame.height - 1, width: frame.width, height: 1)
-        bottomLine.backgroundColor = AppConstants.orange.cgColor
+        bottomBorder.frame = CGRect(x: 0, y: bounds.height - 1, width: bounds.width, height: 1)
+        bottomBorder.backgroundColor = AppConstants.orange.cgColor
         borderStyle = .none
-        layer.addSublayer(bottomLine)
+        layer.addSublayer(bottomBorder)
     }
     
     private func addSearchIcon() {
@@ -125,6 +125,11 @@ class searchTextField: UITextField, UITableViewDelegate, UITableViewDataSource {
     
     override func editingRect(forBounds bounds: CGRect) -> CGRect {
         return CGRect(x: searchIconView.frame.maxX + 10, y: bounds.origin.y, width: bounds.width, height: bounds.height)
+    }
+
+    override func layoutSubviews() {
+        super.layoutSubviews()
+        bottomBorder.frame = CGRect(x: 0, y: bounds.height - 1, width: bounds.width, height: 1)
     }
     
     // MARK: - Table

@@ -102,6 +102,7 @@ class AddTracksTabBarController: UITabBarController, UITabBarControllerDelegate,
         tabBar.backgroundColor = AppConstants.darkerBlack
         tabBar.shadowImage = UIImage()
         tabBar.backgroundImage = UIImage()
+        tabBar.clipsToBounds = true
     }
     
     private func initializeVariables() {
