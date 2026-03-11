@@ -34,12 +34,14 @@ class AddTracksTabBarController: UITabBarController, UITabBarControllerDelegate,
         }
     }
     
-    var tracksList: [Track] {
-        if let controller = selectedViewController as? SearchViewController {
-            return controller.tracksList
-        } else {
-            return myHubController.tracksList
+    private func tracksList(for tableView: UITableView) -> [Track] {
+        // Use the calling table view to avoid mismatches during rapid tab switches.
+        if let searchController = viewControllers?.compactMap({ $0 as? SearchViewController }).first,
+           tableView == searchController.trackTableView {
+            return searchController.tracksList
         }
+
+        return myHubController.tracksList
     }
     
     private func updateBadge(to count: Int) {
@@ -98,6 +100,8 @@ class AddTracksTabBarController: UITabBarController, UITabBarControllerDelegate,
         tabBar.isTranslucent = false
         tabBar.barTintColor = AppConstants.darkerBlack
         tabBar.backgroundColor = AppConstants.darkerBlack
+        tabBar.shadowImage = UIImage()
+        tabBar.backgroundImage = UIImage()
     }
     
     private func initializeVariables() {
@@ -126,12 +130,14 @@ class AddTracksTabBarController: UITabBarController, UITabBarControllerDelegate,
     }
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return tracksList.count
+        return tracksList(for: tableView).count
     }
     
     func tableView(_ tableView: UITableView, willDisplay cell: UITableViewCell, forRowAt indexPath: IndexPath) {
+        let list = tracksList(for: tableView)
+        guard indexPath.row < list.count else { return }
         cell.backgroundColor = .clear
-        if Party.tracksQueue(hasTrack: tracksList[indexPath.row]) || tracksSelected.contains(where: { $0.id == tracksList[indexPath.row].id }) {
+        if Party.tracksQueue(hasTrack: list[indexPath.row]) || tracksSelected.contains(where: { $0.id == list[indexPath.row].id }) {
             cell.accessoryType = .checkmark
             tableView.selectRow(at: indexPath, animated: true, scrollPosition: .none)
         } else {
@@ -139,26 +145,29 @@ class AddTracksTabBarController: UITabBarController, UITabBarControllerDelegate,
         }
         
         if tableView == myHubController.tracksTableView,
-           indexPath.row >= tracksList.count - 5 {
+           indexPath.row >= list.count - 5 {
             myHubController.loadMoreMostPlayedIfNeeded()
         }
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "Track", for: indexPath) as! TrackTableViewCell
+        let list = tracksList(for: tableView)
+        guard indexPath.row < list.count else { return cell }
         
         // Cell Properties
-        cell.trackName.text = tracksList[indexPath.row].name
-        cell.artistName.text = tracksList[indexPath.row].artist
-        cell.artworkImageView.image = tracksList[indexPath.row].lowResArtwork
+        cell.trackName.text = list[indexPath.row].name
+        cell.artistName.text = list[indexPath.row].artist
+        cell.artworkImageView.image = list[indexPath.row].lowResArtwork
         
         return cell
     }
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         let cell = tableView.cellForRow(at: indexPath)!
-        
-        let track = tracksList[indexPath.row]
+        let list = tracksList(for: tableView)
+        guard indexPath.row < list.count else { return }
+        let track = list[indexPath.row]
         if isAppleMusicLibrarySelection(for: tableView) {
             addToLibraryQueue(track: track)
         } else {
@@ -177,14 +186,16 @@ class AddTracksTabBarController: UITabBarController, UITabBarControllerDelegate,
     
     func tableView(_ tableView: UITableView, didDeselectRowAt indexPath: IndexPath) {
         let cell = tableView.cellForRow(at: indexPath)!
-        let track = tracksList[indexPath.row]
+        let list = tracksList(for: tableView)
+        guard indexPath.row < list.count else { return }
+        let track = list[indexPath.row]
         if isAppleMusicLibrarySelection(for: tableView) {
             removeFromLibraryQueue(track: track)
         } else {
             removeFromQueue(track: track)
         }
         
-        if !Party.tracksQueue(hasTrack: tracksList[indexPath.row]) {
+        if !Party.tracksQueue(hasTrack: list[indexPath.row]) {
             UIView.animate(withDuration: 0.35) {
                 cell.accessoryType = .none
             }

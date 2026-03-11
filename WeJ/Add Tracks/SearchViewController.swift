@@ -44,6 +44,9 @@ class SearchViewController: UIViewController, UITextFieldDelegate, SelectionCoun
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        view.backgroundColor = AppConstants.darkerBlack
+        view.isOpaque = true
+        navigationController?.view.backgroundColor = AppConstants.darkerBlack
         setupSelectionCountBadge()
         initializeVariables()
         
@@ -80,7 +83,7 @@ class SearchViewController: UIViewController, UITextFieldDelegate, SelectionCoun
         let placeholderText = NSLocalizedString("Search", comment: "") + " " + Party.musicService.toString()
         searchTracksField.attributedPlaceholder = NSAttributedString(string: placeholderText, attributes: [NSAttributedStringKey.foregroundColor: UIColor.lightGray])
         
-        trackTableView.backgroundColor = .clear
+        trackTableView.backgroundColor = AppConstants.darkerBlack
         trackTableView.contentInset = UIEdgeInsets(top: 0, left: 0, bottom: 50, right: 0)
     }
     
