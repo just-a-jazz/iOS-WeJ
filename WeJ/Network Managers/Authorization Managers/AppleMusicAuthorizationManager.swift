@@ -34,7 +34,11 @@ class AppleMusicAuthorizationManager: NSObject, AuthorizationManager {
             let (data, response) = try await URLSession.shared.data(for: request)
             if let statusCode = (response as? HTTPURLResponse)?.statusCode,
                statusCode == 200 {
-                developerToken = String(data: data, encoding: .utf8)
+                let json = try JSONSerialization.jsonObject(with: data) as? [String: Any]
+                guard let token = json?["token"] as? String else {
+                    throw NSError(domain: "AppleMusicAuthorizationManager", code: 1)
+                }
+                developerToken = token
             }
         } catch {
             developerToken = nil

@@ -16,8 +16,8 @@ struct SpotifyConstants {
     static let clientSecret = PrivateConfig.spotifyClientSecret
     
     static let redirectURL = PrivateConfig.spotifyRedirectURL
-    static let swapURL = URL(string: "http://\(PrivateConfig.webServerURL):\(PrivateConfig.spotifyWebServerPort)/swap")
-    static let refreshURL = URL(string: "http://\(PrivateConfig.webServerURL):\(PrivateConfig.spotifyWebServerPort)/refresh")
+    static let swapURL = URL(string: "https://\(PrivateConfig.webServerURL)/spotify/swap")
+    static let refreshURL = URL(string: "https://\(PrivateConfig.webServerURL)/spotify/refresh")
     
     static var authorizationToken: String {
         return Data((clientID + ":" + clientSecret).utf8).base64EncodedString()

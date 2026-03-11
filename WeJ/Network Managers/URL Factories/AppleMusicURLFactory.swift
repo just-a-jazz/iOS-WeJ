@@ -15,8 +15,7 @@ struct AppleMusicURLFactory {
         var urlComponents = URLComponents()
         urlComponents.scheme = "https"
         urlComponents.host = PrivateConfig.webServerURL
-        urlComponents.port = PrivateConfig.appleWebServerPort
-        urlComponents.path = "/apple_developer_token"
+        urlComponents.path = "/apple/token"
         
         var urlRequest = URLRequest(url: urlComponents.url!)
         urlRequest.httpMethod = "GET"

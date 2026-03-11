@@ -64,6 +64,7 @@
 		41C1113F1F2A158500A33771 /* AppleMusicConstants.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41C1113E1F2A158500A33771 /* AppleMusicConstants.swift */; };
 		41F345A41F34BD05007A250B /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 41F345A31F34BD05007A250B /* Assets.xcassets */; };
 		99E05000123D800F309A600D /* Pods_WeJ.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FB7198514224E0BBDF2873C4 /* Pods_WeJ.framework */; };
+		FC2632EB2F61040E00313190 /* PrivateConfig.template.swift in Sources */ = {isa = PBXBuildFile; fileRef = FC2632EA2F61040E00313190 /* PrivateConfig.template.swift */; };
 		FC5B37A42EFB281200DA9553 /* PrivateConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = FC5B37A32EFB280F00DA9553 /* PrivateConfig.swift */; };
 		FC5B37A72EFCF0F500DA9553 /* SpotifyiOS.xcframework in Frameworks */ = {isa = PBXBuildFile; fileRef = FC5B37A52EFCF0E500DA9553 /* SpotifyiOS.xcframework */; };
 		FC5B37A82EFCF0F500DA9553 /* SpotifyiOS.xcframework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = FC5B37A52EFCF0E500DA9553 /* SpotifyiOS.xcframework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
@@ -161,6 +162,7 @@
 		41F345A31F34BD05007A250B /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; name = Assets.xcassets; path = "Supporting Files/Assets.xcassets"; sourceTree = "<group>"; };
 		CB810334E004CAA30F9C84CE /* Pods-WeJ.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-WeJ.release.xcconfig"; path = "Pods/Target Support Files/Pods-WeJ/Pods-WeJ.release.xcconfig"; sourceTree = "<group>"; };
 		FB7198514224E0BBDF2873C4 /* Pods_WeJ.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_WeJ.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		FC2632EA2F61040E00313190 /* PrivateConfig.template.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrivateConfig.template.swift; sourceTree = "<group>"; };
 		FC5B37A32EFB280F00DA9553 /* PrivateConfig.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrivateConfig.swift; sourceTree = "<group>"; };
 		FC5B37A52EFCF0E500DA9553 /* SpotifyiOS.xcframework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcframework; path = SpotifyiOS.xcframework; sourceTree = "<group>"; };
 		FC5B37EC2F4850B500DA9553 /* SelectionCountBadgePresenting.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SelectionCountBadgePresenting.swift; sourceTree = "<group>"; };
@@ -392,6 +394,7 @@
 				41C1113E1F2A158500A33771 /* AppleMusicConstants.swift */,
 				416E8C3E1F2A046E00F524E0 /* SpotifyConstants.swift */,
 				FC5B37A32EFB280F00DA9553 /* PrivateConfig.swift */,
+				FC2632EA2F61040E00313190 /* PrivateConfig.template.swift */,
 			);
 			path = Constants;
 			sourceTree = "<group>";
@@ -583,6 +586,7 @@
 				FC5B37A42EFB281200DA9553 /* PrivateConfig.swift in Sources */,
 				FCC6128720C3797400F65E42 /* MXMLyricsAction.m in Sources */,
 				412F98181F4F731A0055A9FA /* PartiesListViewController.swift in Sources */,
+				FC2632EB2F61040E00313190 /* PrivateConfig.template.swift in Sources */,
 				41C0AEBE1E7A12E000C797F0 /* QueueViewController.swift in Sources */,
 				41C0AEB61E79512D00C797F0 /* searchTextField.swift in Sources */,
 				413533291E8DE4C600BE5B0F /* MusicService.swift in Sources */,

@@ -40,7 +40,9 @@ class SpotifyAuthorizationManager: NSObject, AuthorizationManager, SPTSessionMan
         self.sessionManager = SPTSessionManager(configuration: configuration, delegate: nil)
         
         let urlSessionConfiguration = URLSessionConfiguration.default
-        urlSessionConfiguration.waitsForConnectivity = true
+        urlSessionConfiguration.waitsForConnectivity = false
+        urlSessionConfiguration.timeoutIntervalForRequest = 15
+        urlSessionConfiguration.timeoutIntervalForResource = 30
         self.spotifyAuthSession = URLSession(configuration: urlSessionConfiguration)
         
         super.init()
@@ -194,21 +196,21 @@ class SpotifyAuthorizationManager: NSObject, AuthorizationManager, SPTSessionMan
     private func exchangeCodeForWebAccessToken(_ code: String) {
         let request = SpotifyURLFactory.createTokenSwapRequest(withCode: code)
         
-        spotifyAuthSession.dataTask(with: request) { [weak self] data, _, error in
-            self?.handleTokenResponse(data: data, error: error)
+        spotifyAuthSession.dataTask(with: request) { [weak self] data, response, error in
+            self?.handleTokenResponse(data: data, response: response, error: error)
         }.resume()
     }
     
     private func refreshWebAccessToken(_ refreshToken: String) {
         let request = SpotifyURLFactory.createTokenRefreshRequest(withRefreshToken: refreshToken)
         
-        spotifyAuthSession.dataTask(with: request) { [weak self] data, _, error in
-            self?.handleTokenResponse(data: data, error: error, fallbackRefreshToken: refreshToken)
+        spotifyAuthSession.dataTask(with: request) { [weak self] data, response, error in
+            self?.handleTokenResponse(data: data, response: response, error: error, fallbackRefreshToken: refreshToken)
         }.resume()
     }
     
-    private func handleTokenResponse(data: Data?, error: Error?, fallbackRefreshToken: String? = nil) {
-        guard let tokenResponse = processTokenResponse(data: data, error: error, fallbackRefreshToken: fallbackRefreshToken, notifyOnError: true) else {
+    private func handleTokenResponse(data: Data?, response: URLResponse?, error: Error?, fallbackRefreshToken: String? = nil) {
+        guard let tokenResponse = processTokenResponse(data: data, response: response, error: error, fallbackRefreshToken: fallbackRefreshToken, notifyOnError: true) else {
             finishProcessingLogin()
             return
         }
@@ -236,8 +238,8 @@ class SpotifyAuthorizationManager: NSObject, AuthorizationManager, SPTSessionMan
         dispatchGroup.enter()
         
         var tokenResponse: WebTokenResponse?
-        spotifyAuthSession.dataTask(with: request) { [weak self] data, _, error in
-            tokenResponse = self?.processTokenResponse(data: data, error: error, fallbackRefreshToken: refreshToken, notifyOnError: false)
+        spotifyAuthSession.dataTask(with: request) { [weak self] data, response, error in
+            tokenResponse = self?.processTokenResponse(data: data, response: response, error: error, fallbackRefreshToken: refreshToken, notifyOnError: false)
             dispatchGroup.leave()
         }.resume()
         
@@ -253,14 +255,34 @@ class SpotifyAuthorizationManager: NSObject, AuthorizationManager, SPTSessionMan
         let expiresIn: Double
     }
     
-    private func processTokenResponse(data: Data?, error: Error?, fallbackRefreshToken: String?, notifyOnError: Bool) -> WebTokenResponse? {
-        if let _ = error as NSError? {
-            SpotifyAuthorizationManager.postAlertForInternet()
+    private func processTokenResponse(data: Data?, response: URLResponse?, error: Error?, fallbackRefreshToken: String?, notifyOnError: Bool) -> WebTokenResponse? {
+        if let error = error as NSError? {
+            if notifyOnError {
+                if error.code == NSURLErrorNotConnectedToInternet {
+                    SpotifyAuthorizationManager.postAlertForInternet()
+                } else {
+                    SpotifyAuthorizationManager.postAlertForAuthServer()
+                }
+            }
+            return nil
+        }
+        
+        if let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode != 200 {
+            if notifyOnError {
+                SpotifyAuthorizationManager.postAlertForAuthServer()
+            }
             return nil
         }
         
         guard let data = data else { return nil }
-        return parseWebTokenResponse(data: data, fallbackRefreshToken: fallbackRefreshToken)
+        guard let tokenResponse = parseWebTokenResponse(data: data, fallbackRefreshToken: fallbackRefreshToken) else {
+            if notifyOnError {
+                SpotifyAuthorizationManager.postAlertForAuthServer()
+            }
+            return nil
+        }
+        
+        return tokenResponse
     }
     
     private func parseWebTokenResponse(data: Data, fallbackRefreshToken: String?) -> WebTokenResponse? {
@@ -306,6 +328,16 @@ class SpotifyAuthorizationManager: NSObject, AuthorizationManager, SPTSessionMan
     private func loadStoredWebRefreshToken() -> String? {
         return UserDefaults.standard.string(forKey: SpotifyAuthorizationManager.webRefreshTokenDefaultsKey)
     }
+
+    static func clearStoredWebTokens() {
+        let defaults = UserDefaults.standard
+        defaults.removeObject(forKey: SpotifyAuthorizationManager.webAccessTokenDefaultsKey)
+        defaults.removeObject(forKey: SpotifyAuthorizationManager.webRefreshTokenDefaultsKey)
+        defaults.removeObject(forKey: SpotifyAuthorizationManager.webTokenExpiryDefaultsKey)
+        defaults.synchronize()
+        Party.spotifyAccessToken = nil
+        shared.sessionManager.session = nil
+    }
     
     // MARK: - Alerts
     
@@ -326,6 +358,18 @@ class SpotifyAuthorizationManager: NSObject, AuthorizationManager, SPTSessionMan
         alert.addAction(UIAlertAction(title: NSLocalizedString("OK", comment: ""), style: .default, handler: nil))
         
         delegate?.present(alert, animated: true, completion: nil)
+    }
+    
+    private static func postAlertForAuthServer() {
+        DispatchQueue.main.async {
+            let alert = UIAlertController(title: NSLocalizedString("Error", comment: ""), message: NSLocalizedString("Unable to reach the Authorization Server", comment: ""), preferredStyle: .alert)
+            alert.addAction(UIAlertAction(title: NSLocalizedString("Try Again", comment: ""), style: .default) { _ in
+                delegate?.tryAgain()
+            })
+            alert.addAction(UIAlertAction(title: NSLocalizedString("OK", comment: ""), style: .default, handler: nil))
+            
+            delegate?.present(alert, animated: true, completion: nil)
+        }
     }
     
 }
