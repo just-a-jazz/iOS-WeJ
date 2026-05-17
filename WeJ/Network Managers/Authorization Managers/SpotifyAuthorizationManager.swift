@@ -83,7 +83,7 @@ class SpotifyAuthorizationManager: NSObject, AuthorizationManager, SPTSessionMan
         return manager.sessionManager.application(application, open: url, options: options)
     }
     
-    static func handleUserActivity(application: UIApplication, userActivity: NSUserActivity, restorationHandler: @escaping ([UIUserActivityRestoring]?) -> Void) -> Bool {
+    static func handleUserActivity(application: UIApplication, userActivity: NSUserActivity, restorationHandler: @escaping ([Any]?) -> Void) -> Bool {
         return shared.sessionManager.application(application, continue: userActivity, restorationHandler: restorationHandler)
     }
     

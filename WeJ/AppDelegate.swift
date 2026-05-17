@@ -32,8 +32,13 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         return SpotifyAuthorizationManager.handleAuthCallback(application: app, open: url, options: options)
     }
     
-    private func application(_ application: UIApplication, continue userActivity: NSUserActivity, restorationHandler: @escaping ([UIUserActivityRestoring]?) -> Void) -> Bool {
+    func application(_ application: UIApplication, continue userActivity: NSUserActivity, restorationHandler: @escaping ([Any]?) -> Void) -> Bool {
         return SpotifyAuthorizationManager.handleUserActivity(application: application, userActivity: userActivity, restorationHandler: restorationHandler)
+    }
+    
+    @available(iOS 13.0, *)
+    func application(_ application: UIApplication, configurationForConnecting connectingSceneSession: UISceneSession, options: UIScene.ConnectionOptions) -> UISceneConfiguration {
+        return UISceneConfiguration(name: "Default Configuration", sessionRole: connectingSceneSession.role)
     }
     
     func applicationWillResignActive(_ application: UIApplication) {
