@@ -33,11 +33,7 @@ class AppleMusicFetcher: Fetcher {
             if let statusCode = (response as? HTTPURLResponse)?.statusCode, statusCode == 200 {
                 completionHandler(data, response, error)
             } else if let statusCode = (response as? HTTPURLResponse)?.statusCode, statusCode == 401 {
-                print("Error 1: \(error?.localizedDescription ?? "No error description")")
                 AppleMusicAuthorizationManager.developerToken = nil
-            } else {
-                print("Error 2: \(error?.localizedDescription ?? "No error description")")
-                print(response.debugDescription)
             }
         }
         
@@ -87,7 +83,6 @@ class AppleMusicFetcher: Fetcher {
             let response = try await request.response()
             return response.songs.map { parse(song: $0) }
         } catch {
-            print("Apple Music MusicKit search failed: \(error.localizedDescription)")
             return []
         }
     }

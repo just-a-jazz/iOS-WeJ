@@ -99,18 +99,20 @@ class HubViewController: UIViewController, UITableViewDelegate, UITableViewDataS
     }
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        tableView.deselectRow(at: indexPath, animated: true)
+
         if hubOptions[indexPath.row] == NSLocalizedString("Leave Party", comment: "") {
             leaveParty()
-        } else if let position = delegate?.currentTrackPosition, !Party.tracksQueue.isEmpty {
+        } else if let position = delegate?.currentTrackPosition, let currentTrack = Party.tracksQueue.first {
             MXMLyricsAction.sharedExtension().findLyricsForSong(
-                withTitle: Party.tracksQueue[0].name,
-                artist: Party.tracksQueue[0].artist,
+                withTitle: currentTrack.name,
+                artist: currentTrack.artist,
                 album: "",
-                artWork: Party.tracksQueue[0].highResArtwork,
+                artWork: currentTrack.highResArtwork,
                 currentProgress: position,
-                trackDuration: Party.tracksQueue[0].length!,
+                trackDuration: currentTrack.length ?? 0,
                 for: self,
-                sender: tableView.dequeueReusableCell(withIdentifier: "Hub Cell")!,
+                sender: tableView.cellForRow(at: indexPath) ?? tableView,
                 competionHandler: nil)
         } else {
             postAlertForNoTracks()

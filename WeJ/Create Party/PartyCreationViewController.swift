@@ -58,6 +58,7 @@ class PartyCreationViewController: UIViewController, UITextFieldDelegate, ViewCo
         setDelegates()
         
         setPartyName()
+//        disableSpotifyButton()
         setMusicService()
     }
     
@@ -99,14 +100,19 @@ class PartyCreationViewController: UIViewController, UITextFieldDelegate, ViewCo
     private func setMusicService() {
         if let rawMusicService = UserDefaults.standard.object(forKey: "musicService") as? String,
             let musicService = MusicService(rawValue: rawMusicService) {
-            if musicService == .spotify {
+            if musicService == .spotify && !spotifyButton.isHidden {
                 changeToSpotify()
             } else {
                 changeToAppleMusic()
             }
         } else {
-            changeToSpotify()
+            changeToAppleMusic()
         }
+    }
+    
+    private func disableSpotifyButton() {
+        spotifyButton.isEnabled = false
+        spotifyButton.isHidden = true
     }
     
     // MARK: - Text Field

@@ -364,19 +364,28 @@ class PartyViewController: UIViewController, MusicPlayerDelegate, UpdatePartyDel
     }
     
     private func updateCurrentlyPlayingTrack() {
-        DispatchQueue.main.async {
-            if !Party.tracksQueue.isEmpty {
-                self.currentlyPlayingArtwork.image = Party.tracksQueue[0].highResArtwork?.addGradient()
-                self.currentlyPlayingTrackName.text = Party.tracksQueue[0].name
-                self.currentlyPlayingArtistName.text = Party.tracksQueue[0].artist
+        let update = { [weak self] in
+            guard let self = self else { return }
+            
+            if let track = Party.tracksQueue.first {
+                self.currentlyPlayingArtwork.image = track.highResArtwork?.addGradient()
+                self.currentlyPlayingTrackName.text = track.name
+                self.currentlyPlayingArtistName.text = track.artist
             } else {
                 self.hideCurrentlyPlayingArtwork()
             }
+        }
+        
+        if Thread.isMainThread {
+            update()
+        } else {
+            DispatchQueue.main.async(execute: update)
         }
     }
     
     func showCurrentlyPlayingArtwork() {
         DispatchQueue.main.async {
+            self.updateCurrentlyPlayingTrack()
             self.currentlyPlayingArtwork.isHidden = false
             self.currentlyPlayingTrackName.isHidden = false
             self.currentlyPlayingArtistName.isHidden = false
@@ -392,7 +401,9 @@ class PartyViewController: UIViewController, MusicPlayerDelegate, UpdatePartyDel
             self.currentlyPlayingArtwork.isHidden = true
             self.currentlyPlayingArtwork.image = nil
             self.currentlyPlayingTrackName.isHidden = true
+            self.currentlyPlayingTrackName.text = nil
             self.currentlyPlayingArtistName.isHidden = true
+            self.currentlyPlayingArtistName.text = nil
             self.playPauseButton.isHidden = true
             self.skipTrackButton.isHidden = true
             self.hubAndQueueVC?.expandTracksTable()

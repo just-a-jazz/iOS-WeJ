@@ -139,36 +139,42 @@ class SpotifyAuthorizationManager: NSObject, AuthorizationManager, SPTSessionMan
         let authURL = SpotifyURLFactory.createWebAuthorizationURL(withScopes: webAuthScopes)
         let callbackScheme = SpotifyConstants.redirectURL.scheme
         let session = ASWebAuthenticationSession(url: authURL, callbackURLScheme: callbackScheme) { [weak self] url, error in
-            self?.handleWebAuthCallback(url!, error: error)
+            self?.handleWebAuthCallback(url, error: error)
         }
         session.presentationContextProvider = self
         self.webAuthenticationSession = session
         session.start()
     }
     
-    private func handleWebAuthCallback(_ url: URL, error: Error? = nil) {
+    private func handleWebAuthCallback(_ url: URL?, error: Error? = nil) {
         isWebAuthInProgress = false
         
         if let error = error as NSError? {
             if error.code == NSURLErrorNotConnectedToInternet {
                 SpotifyAuthorizationManager.postAlertForInternet()
+            } else {
+                SpotifyAuthorizationManager.postAlertForAuthServer()
             }
             finishProcessingLogin()
             return
         }
         
-        guard let components = URLComponents(url: url, resolvingAgainstBaseURL: false) else {
+        guard let url = url,
+              let components = URLComponents(url: url, resolvingAgainstBaseURL: false) else {
+            SpotifyAuthorizationManager.postAlertForAuthServer()
             finishProcessingLogin()
             return
         }
         
         let queryItems = components.queryItems ?? []
         if let _ = queryItems.first(where: { $0.name == "error" })?.value {
+            SpotifyAuthorizationManager.postAlertForAuthServer()
             finishProcessingLogin()
             return
         }
         
         guard let code = queryItems.first(where: { $0.name == "code" })?.value else {
+            SpotifyAuthorizationManager.postAlertForAuthServer()
             finishProcessingLogin()
             return
         }

@@ -18,6 +18,7 @@ class QueueViewController: UIViewController, UITableViewDelegate, UITableViewDat
     
     @IBOutlet weak var tracksTableView: UITableView!
     private var upNextSeparator: UIView?
+    private var visibleTracksQueue = [Track]()
 
     fileprivate var minHeight: CGFloat {
         return HubAndQueuePageViewController.minHeight
@@ -30,6 +31,7 @@ class QueueViewController: UIViewController, UITableViewDelegate, UITableViewDat
         
     override func viewDidLoad() {
         super.viewDidLoad()
+        refreshVisibleQueueSnapshot()
         setDelegates()
         adjustFontSizes()
         addUpNextSeparatorIfNeeded()
@@ -88,7 +90,7 @@ class QueueViewController: UIViewController, UITableViewDelegate, UITableViewDat
     }
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return Party.tracksQueue.count - 1
+        return visibleTracksQueue.count
     }
     
     func tableView(_ tableView: UITableView, willDisplay cell: UITableViewCell, forRowAt indexPath: IndexPath) {
@@ -101,10 +103,14 @@ class QueueViewController: UIViewController, UITableViewDelegate, UITableViewDat
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "Track In Queue") as! TrackTableViewCell
         
-        if Party.tracksQueue.count > indexPath.row {
-            cell.trackName.text = Party.tracksQueue[indexPath.row + 1].name
-            cell.artistName.text = Party.tracksQueue[indexPath.row + 1].artist
-            cell.artworkImageView.image = Party.tracksQueue[indexPath.row + 1].lowResArtwork
+        if let track = visibleTrack(at: indexPath) {
+            cell.trackName.text = track.name
+            cell.artistName.text = track.artist
+            cell.artworkImageView.image = track.lowResArtwork
+        } else {
+            cell.trackName.text = nil
+            cell.artistName.text = nil
+            cell.artworkImageView.image = nil
         }
         
         return cell
@@ -128,37 +134,66 @@ class QueueViewController: UIViewController, UITableViewDelegate, UITableViewDat
     }
     
     func tableView(_ tableView: UITableView, canEditRowAt indexPath: IndexPath) -> Bool {
-        return delegate!.isHost || delegate!.personalQueue.contains(where: { $0.id == Party.tracksQueue[indexPath.row + 1].id })
+        guard let track = visibleTrack(at: indexPath),
+              let delegate = delegate else {
+            return false
+        }
+        return delegate.isHost || delegate.personalQueue.contains(where: { $0.id == track.id })
     }
     
     func tableView(_ tableView: UITableView, canMoveRowAt indexPath: IndexPath) -> Bool {
-        return delegate!.isHost
+        return delegate?.isHost == true && visibleTrack(at: indexPath) != nil
     }
     
     
     func tableView(_ tableView: UITableView, moveRowAt sourceIndexPath: IndexPath, to destinationIndexPath: IndexPath) {
-        var newTracksQueue = Party.tracksQueue.map { $0.copy() } as! [Track]
-        let itemMoved = newTracksQueue[sourceIndexPath.row + 1]
+        guard visibleTracksQueue.indices.contains(sourceIndexPath.row),
+              visibleTracksQueue.indices.contains(destinationIndexPath.row) else {
+            refreshVisibleQueueSnapshot()
+            tableView.reloadData()
+            return
+        }
         
-        newTracksQueue.remove(at: sourceIndexPath.row + 1)
-        newTracksQueue.insert(itemMoved, at: destinationIndexPath.row + 1)
+        var reorderedVisibleTracks = visibleTracksQueue
+        let itemMoved = reorderedVisibleTracks.remove(at: sourceIndexPath.row)
+        reorderedVisibleTracks.insert(itemMoved, at: destinationIndexPath.row)
         
-        Party.tracksQueue = newTracksQueue
+        applyVisibleTracksQueue(reorderedVisibleTracks)
     }
     
     func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCellEditingStyle, forRowAt indexPath: IndexPath) {
         if editingStyle == .delete {
-            tableView.reloadData()
+            guard let track = removeTrack(atVisibleIndex: indexPath.row) else {
+                refreshVisibleQueueSnapshot()
+                tableView.reloadData()
+                return
+            }
+            
             tableView.beginUpdates()
-            let track = removeTrack(atIndex: indexPath.row + 1)
             tableView.deleteRows(at: [indexPath], with: .right)
             tableView.endUpdates()
             delegate?.sendTracksToPeers(forTracks: [track], toRemove: true)
         }
     }
     
-    func removeTrack(atIndex index: Int) -> Track {
-        return Party.tracksQueue.remove(at: index)
+    func removeTrack(atVisibleIndex visibleIndex: Int) -> Track? {
+        guard visibleTracksQueue.indices.contains(visibleIndex),
+              Party.tracksQueue.count > 1 else {
+            return nil
+        }
+        
+        let track = visibleTracksQueue[visibleIndex]
+        guard let queueIndex = Party.tracksQueue[1...].index(where: { $0.id == track.id }) else {
+            return nil
+        }
+        
+        let removedTrack = Party.tracksQueue.remove(at: queueIndex)
+        if visibleTracksQueue.indices.contains(visibleIndex) {
+            visibleTracksQueue.remove(at: visibleIndex)
+        } else {
+            refreshVisibleQueueSnapshot()
+        }
+        return removedTrack
     }
     
     func tableView(_ tableView: UITableView, trailingSwipeActionsConfigurationForRowAt indexPath: IndexPath) -> UISwipeActionsConfiguration? {
@@ -171,6 +206,41 @@ class QueueViewController: UIViewController, UITableViewDelegate, UITableViewDat
             completion(true)
         }
         return UISwipeActionsConfiguration(actions: [deleteAction])
+    }
+    
+}
+
+private extension QueueViewController {
+    
+    var currentVisibleTracksQueue: [Track] {
+        guard Party.tracksQueue.count > 1 else { return [] }
+        return Array(Party.tracksQueue.dropFirst())
+    }
+    
+    func refreshVisibleQueueSnapshot() {
+        visibleTracksQueue = currentVisibleTracksQueue
+    }
+    
+    func visibleTrack(at indexPath: IndexPath) -> Track? {
+        guard visibleTracksQueue.indices.contains(indexPath.row) else { return nil }
+        return visibleTracksQueue[indexPath.row]
+    }
+    
+    func applyVisibleTracksQueue(_ reorderedVisibleTracks: [Track]) {
+        guard let currentTrack = Party.tracksQueue.first else {
+            visibleTracksQueue = reorderedVisibleTracks
+            Party.tracksQueue = reorderedVisibleTracks
+            return
+        }
+        
+        let latestVisibleTracks = currentVisibleTracksQueue
+        let latestVisibleTrackIDs = Set(latestVisibleTracks.map { $0.id })
+        let reorderedTracksStillInQueue = reorderedVisibleTracks.filter { latestVisibleTrackIDs.contains($0.id) }
+        let reorderedTrackIDs = Set(reorderedTracksStillInQueue.map { $0.id })
+        let tracksAddedAfterSnapshot = latestVisibleTracks.filter { !reorderedTrackIDs.contains($0.id) }
+        
+        visibleTracksQueue = reorderedTracksStillInQueue + tracksAddedAfterSnapshot
+        Party.tracksQueue = [currentTrack] + visibleTracksQueue
     }
     
 }
@@ -238,7 +308,7 @@ extension QueueViewController {
     }
     
     fileprivate func goIntoEditingMode() {
-        if (delegate!.isHost && Party.tracksQueue.count > 1) || tracksQueueHasEditableTracks() {
+        if (delegate!.isHost && !currentVisibleTracksQueue.isEmpty) || tracksQueueHasEditableTracks() {
             if addButton.isHidden {
                 editButton.isHidden = false
             } else {
@@ -259,8 +329,8 @@ extension QueueViewController {
     }
     
     private func tracksQueueHasEditableTracks() -> Bool {
-        for track in Party.tracksQueue {
-            if delegate!.personalQueue.contains(where: { $0.id == track.id }) && track != Party.tracksQueue[0] {
+        for track in currentVisibleTracksQueue {
+            if delegate!.personalQueue.contains(where: { $0.id == track.id }) {
                 return true
             }
         }
@@ -314,6 +384,7 @@ extension QueueViewController {
     func updateTable() {
         DispatchQueue.main.async {
             if !self.tracksTableView.isEditing {
+                self.refreshVisibleQueueSnapshot()
                 self.tracksTableView.reloadData()
             }
         }

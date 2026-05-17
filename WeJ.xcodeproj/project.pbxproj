@@ -47,7 +47,6 @@
 		417C38EA1DDA91A100F59926 /* PartyCreationViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 417C38E21DDA447600F59926 /* PartyCreationViewController.swift */; };
 		417C38EC1DDA91A800F59926 /* InitialSetupViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 417C38E11DDA447600F59926 /* InitialSetupViewController.swift */; };
 		417C38EE1DDA91B100F59926 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 417C38CC1DDA43FD00F59926 /* AppDelegate.swift */; };
-		417C38EF1DDA91B500F59926 /* Party.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = 417C38D31DDA43FD00F59926 /* Party.xcdatamodeld */; };
 		41835F901E81EE740082BA16 /* HubTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41835F8F1E81EE740082BA16 /* HubTableViewCell.swift */; };
 		418503F71E307BE900472006 /* setupButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 418503F61E307BE900472006 /* setupButton.swift */; };
 		419F4AFA1F573A6D0006BB3C /* HintTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 419F4AF91F573A6D0006BB3C /* HintTableViewCell.swift */; };
@@ -65,6 +64,7 @@
 		41F345A41F34BD05007A250B /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 41F345A31F34BD05007A250B /* Assets.xcassets */; };
 		99E05000123D800F309A600D /* Pods_WeJ.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FB7198514224E0BBDF2873C4 /* Pods_WeJ.framework */; };
 		FC2632EB2F61040E00313190 /* PrivateConfig.template.swift in Sources */ = {isa = PBXBuildFile; fileRef = FC2632EA2F61040E00313190 /* PrivateConfig.template.swift */; };
+		FC4489842FB8417F00BE84FA /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = FC4489832FB8417F00BE84FA /* PrivacyInfo.xcprivacy */; };
 		FC5B37A42EFB281200DA9553 /* PrivateConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = FC5B37A32EFB280F00DA9553 /* PrivateConfig.swift */; };
 		FC5B37A72EFCF0F500DA9553 /* SpotifyiOS.xcframework in Frameworks */ = {isa = PBXBuildFile; fileRef = FC5B37A52EFCF0E500DA9553 /* SpotifyiOS.xcframework */; };
 		FC5B37A82EFCF0F500DA9553 /* SpotifyiOS.xcframework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = FC5B37A52EFCF0E500DA9553 /* SpotifyiOS.xcframework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
@@ -136,7 +136,6 @@
 		417B9D561E31CD8D0021F36E /* TrackTableViewCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = TrackTableViewCell.swift; path = "Play Tracks/TrackTableViewCell.swift"; sourceTree = "<group>"; };
 		417C38C91DDA43FD00F59926 /* WeJ.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = WeJ.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		417C38CC1DDA43FD00F59926 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
-		417C38D41DDA43FD00F59926 /* Party.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = Party.xcdatamodel; sourceTree = "<group>"; };
 		417C38D91DDA43FD00F59926 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = "Supporting Files/Base.lproj/LaunchScreen.storyboard"; sourceTree = "<group>"; };
 		417C38DB1DDA43FD00F59926 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; name = Info.plist; path = "Supporting Files/Info.plist"; sourceTree = "<group>"; };
 		417C38E11DDA447600F59926 /* InitialSetupViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = InitialSetupViewController.swift; sourceTree = "<group>"; };
@@ -163,6 +162,7 @@
 		CB810334E004CAA30F9C84CE /* Pods-WeJ.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-WeJ.release.xcconfig"; path = "Pods/Target Support Files/Pods-WeJ/Pods-WeJ.release.xcconfig"; sourceTree = "<group>"; };
 		FB7198514224E0BBDF2873C4 /* Pods_WeJ.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_WeJ.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		FC2632EA2F61040E00313190 /* PrivateConfig.template.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrivateConfig.template.swift; sourceTree = "<group>"; };
+		FC4489832FB8417F00BE84FA /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 		FC5B37A32EFB280F00DA9553 /* PrivateConfig.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrivateConfig.swift; sourceTree = "<group>"; };
 		FC5B37A52EFCF0E500DA9553 /* SpotifyiOS.xcframework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcframework; path = SpotifyiOS.xcframework; sourceTree = "<group>"; };
 		FC5B37EC2F4850B500DA9553 /* SelectionCountBadgePresenting.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SelectionCountBadgePresenting.swift; sourceTree = "<group>"; };
@@ -358,7 +358,6 @@
 				41B4AE101F2A4D7300F39E04 /* Constants */,
 				41045F321E39B80300A29830 /* WeJ-Bridging-Header.h */,
 				419448001E3FFFDD00B9370C /* Supporting Files */,
-				417C38D31DDA43FD00F59926 /* Party.xcdatamodeld */,
 			);
 			path = WeJ;
 			sourceTree = "<group>";
@@ -370,6 +369,7 @@
 				41F345A31F34BD05007A250B /* Assets.xcassets */,
 				414021131F5218F300B1CDAC /* Localizable.strings */,
 				417C38DB1DDA43FD00F59926 /* Info.plist */,
+				FC4489832FB8417F00BE84FA /* PrivacyInfo.xcprivacy */,
 			);
 			name = "Supporting Files";
 			sourceTree = "<group>";
@@ -499,6 +499,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				FC4489842FB8417F00BE84FA /* PrivacyInfo.xcprivacy in Resources */,
 				414021151F5218F300B1CDAC /* Localizable.strings in Resources */,
 				4165512C1F279A5900FA33F5 /* BlankAudio.wav in Resources */,
 				417C38DA1DDA43FD00F59926 /* LaunchScreen.storyboard in Resources */,
@@ -606,7 +607,6 @@
 				41774CDD1F3E26C900108470 /* PlaylistType.swift in Sources */,
 				41B4AE121F2A5FEF00F39E04 /* SpotifyURLFactory.swift in Sources */,
 				4164CCB51F40FEBE009EBAAF /* Option.swift in Sources */,
-				417C38EF1DDA91B500F59926 /* Party.xcdatamodeld in Sources */,
 				417C38EE1DDA91B100F59926 /* AppDelegate.swift in Sources */,
 				412F981B1F4F75E70055A9FA /* OptionTableViewCell.swift in Sources */,
 				417C38EC1DDA91A800F59926 /* InitialSetupViewController.swift in Sources */,
@@ -885,19 +885,6 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
-
-/* Begin XCVersionGroup section */
-		417C38D31DDA43FD00F59926 /* Party.xcdatamodeld */ = {
-			isa = XCVersionGroup;
-			children = (
-				417C38D41DDA43FD00F59926 /* Party.xcdatamodel */,
-			);
-			currentVersion = 417C38D41DDA43FD00F59926 /* Party.xcdatamodel */;
-			path = Party.xcdatamodeld;
-			sourceTree = "<group>";
-			versionGroupType = wrapper.xcdatamodel;
-		};
-/* End XCVersionGroup section */
 	};
 	rootObject = 417C38C11DDA43FD00F59926 /* Project object */;
 }

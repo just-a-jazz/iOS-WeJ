@@ -35,8 +35,9 @@ NSString *const MusixmatchExtensionHostBundleID =   @"hostBundle";
 NSString *musixmatchAppStoreURL =   @"itms-apps://itunes.apple.com/app/id448278467";
 NSString *musixmatchAppStoreAppID = @"448278467";
 
-@interface MXMLyricsAction () < SKStoreProductViewControllerDelegate, UIAlertViewDelegate >
+@interface MXMLyricsAction () < SKStoreProductViewControllerDelegate >
 @property (nonatomic, strong) UIViewController *hostViewController;
+@property (nonatomic, copy) NSDictionary *pendingSongInfo;
 @end
 
 @implementation MXMLyricsAction
@@ -90,6 +91,33 @@ NSString *musixmatchAppStoreAppID = @"448278467";
     
 }
 
+- (NSURL *)availableMusixmatchAppURL {
+    NSArray *candidateURLs = @[
+        @"mxm://",
+        @"musixmatch://",
+        @"mxm-ext:"
+    ];
+
+    for (NSString *candidateURLString in candidateURLs) {
+        NSURL *url = [NSURL URLWithString:candidateURLString];
+        if (url && [[UIApplication sharedApplication] canOpenURL:url]) {
+            return url;
+        }
+    }
+
+    return nil;
+}
+
+- (BOOL)openMusixmatchApp {
+    NSURL *url = [self availableMusixmatchAppURL];
+    if (!url) {
+        return NO;
+    }
+
+    [[UIApplication sharedApplication] openURL:url options:@{} completionHandler:nil];
+    return YES;
+}
+
 - (void)openAppStore {
     if (nativeAppStoreView && self.hostViewController) {
         [self showAppStoreForMusixmatchFromViewController:self.hostViewController];
@@ -99,9 +127,12 @@ NSString *musixmatchAppStoreAppID = @"448278467";
 }
 
 - (void)openStoreWithOpenURL {
-    
-    [[UIApplication sharedApplication] openURL:[NSURL URLWithString:musixmatchAppStoreURL]];
-    
+    NSURL *url = [NSURL URLWithString:musixmatchAppStoreURL];
+    if (!url) {
+        return;
+    }
+
+    [[UIApplication sharedApplication] openURL:url options:@{} completionHandler:nil];
 }
 
 - (void)showAppStoreForMusixmatchFromViewController:(UIViewController*)controller {
@@ -149,10 +180,16 @@ NSString *musixmatchAppStoreAppID = @"448278467";
              forKey:MusixmatchExtensionDuration];
     [dict setObject:[NSDate date]
              forKey:MusixmatchExtensionStartDate];
-    [dict setObject:[NSNumber numberWithInt:[[UIApplication sharedApplication] statusBarStyle]]
+    UIStatusBarStyle statusBarStyle = UIStatusBarStyleDefault;
+    if (viewController) {
+        statusBarStyle = [viewController preferredStatusBarStyle];
+    }
+
+    [dict setObject:[NSNumber numberWithInteger:statusBarStyle]
              forKey:MusixmatchExtensionStatusBarStyle];
     [dict setObject:[[NSBundle mainBundle] bundleIdentifier]
              forKey:MusixmatchExtensionHostBundleID];
+    self.pendingSongInfo = dict;
     
     [self findLyricsForSong:dict
           forViewController:viewController
@@ -179,6 +216,14 @@ NSString *musixmatchAppStoreAppID = @"448278467";
         return;
     }
     
+    if ([self openMusixmatchApp]) {
+        if (completion) {
+            completion(nil);
+        }
+
+        return;
+    }
+
     if (![self isMusixmatchExtensionAvailable]) {
         
         if (completion) {
@@ -188,12 +233,18 @@ NSString *musixmatchAppStoreAppID = @"448278467";
         [self setHostViewController:viewController];
         
         if (showAlertBeforeAppStore) {
-            UIAlertView *storeAlert = [[UIAlertView alloc] initWithTitle:@"Musixmatch app is required"
-                                                                 message:@"To read the lyrics you need to install Musixmatch from the AppStore."
-                                                                delegate:self
-                                                       cancelButtonTitle:@"No, thanks"
-                                                       otherButtonTitles:@"Get the app", nil];
-            [storeAlert show];
+            UIAlertController *storeAlert = [UIAlertController alertControllerWithTitle:@"Musixmatch app is required"
+                                                                                message:@"To read the lyrics you need to install Musixmatch from the AppStore."
+                                                                         preferredStyle:UIAlertControllerStyleAlert];
+            [storeAlert addAction:[UIAlertAction actionWithTitle:@"No, thanks"
+                                                           style:UIAlertActionStyleCancel
+                                                         handler:nil]];
+            [storeAlert addAction:[UIAlertAction actionWithTitle:@"Get the app"
+                                                           style:UIAlertActionStyleDefault
+                                                         handler:^(UIAlertAction * _Nonnull action) {
+                [self openAppStore];
+            }]];
+            [viewController presentViewController:storeAlert animated:YES completion:nil];
         }else {
             [self openAppStore];
         }
@@ -203,8 +254,9 @@ NSString *musixmatchAppStoreAppID = @"448278467";
     
 #ifdef __IPHONE_8_0
     
-    UIActivityViewController *activityViewController = [self activityViewControllerForItem:dict viewController:viewController sender:sender typeIdentifier:kUTTypeAppExtensionFindSongLyric];
-    activityViewController.completionWithItemsHandler = ^(NSString *activityType, BOOL completed, NSArray *returnedItems, NSError *activityError) {
+    NSDictionary *songInfo = self.pendingSongInfo ?: dict;
+    UIActivityViewController *activityViewController = [self activityViewControllerForItem:songInfo viewController:viewController sender:sender typeIdentifier:kUTTypeAppExtensionFindSongLyric];
+    activityViewController.completionWithItemsHandler = ^(UIActivityType _Nullable activityType, BOOL completed, NSArray * _Nullable returnedItems, NSError * _Nullable activityError) {
         
         if (completion) {
             completion(nil);
@@ -252,16 +304,6 @@ NSString *musixmatchAppStoreAppID = @"448278467";
 
 - (void)productViewControllerDidFinish:(SKStoreProductViewController *)viewController {
     [viewController dismissViewControllerAnimated:YES completion:nil];
-}
-
-#pragma mark - UIAlertView Delegate
-
-- (void)alertView:(UIAlertView *)alertView didDismissWithButtonIndex:(NSInteger)buttonIndex {
-    
-    if (buttonIndex==1) {
-        [self openAppStore];
-    }
-    
 }
 
 @end
