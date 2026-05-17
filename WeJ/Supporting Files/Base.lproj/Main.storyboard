@@ -1177,6 +1177,11 @@
                                                 <mask key="subviews">
                                                     <exclude reference="e1k-qH-cjB"/>
                                                 </mask>
+                                                <mask key="constraints">
+                                                    <exclude reference="L05-EO-5wc"/>
+                                                    <exclude reference="RY4-S1-AtR"/>
+                                                    <exclude reference="Rgb-a2-vGZ"/>
+                                                </mask>
                                             </variation>
                                         </tableViewCellContentView>
                                         <color key="tintColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
