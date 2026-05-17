@@ -225,7 +225,7 @@ class LibraryTracksViewController: UIViewController, UITableViewDelegate, UITabl
         
         let section = orderedLibraryTracksDictKeys[indexPath.section]
         let track = libraryTracksDict[section]![indexPath.row]
-        if libraryTracksSelected.contains(where: { $0.id == track.id }) {
+        if isSelectedOrQueued(track) {
             cell.accessoryType = .checkmark
             tableView.selectRow(at: indexPath, animated: true, scrollPosition: .none)
         } else {
@@ -260,7 +260,7 @@ class LibraryTracksViewController: UIViewController, UITableViewDelegate, UITabl
     }
     
     private func addToQueue(track: Track) {
-        if !libraryTracksSelected.contains(track) {
+        if !Party.tracksQueue(hasTrack: track) && !libraryTracksSelected.contains(where: { $0.id == track.id }) {
             libraryTracksSelected.append(track)
         }
     }
@@ -296,10 +296,18 @@ class LibraryTracksViewController: UIViewController, UITableViewDelegate, UITabl
         let section = orderedLibraryTracksDictKeys[indexPath.section]
         let track = libraryTracksDict[section]![indexPath.row]
         
+        if Party.tracksQueue(hasTrack: track) {
+            tableView.selectRow(at: indexPath, animated: false, scrollPosition: .none)
+            cell.accessoryType = .checkmark
+            return
+        }
+        
         removeFromQueue(track: track)
         modifyPlaylistCheckbox()
-        UIView.animate(withDuration: 0.35) {
-            cell.accessoryType = .none
+        if !Party.tracksQueue(hasTrack: track) {
+            UIView.animate(withDuration: 0.35) {
+                cell.accessoryType = .none
+            }
         }
     }
     
@@ -322,6 +330,10 @@ class LibraryTracksViewController: UIViewController, UITableViewDelegate, UITabl
         if let index = libraryTracksSelected.index(where: {$0.id == track.id}) {
             libraryTracksSelected.remove(at: index)
         }
+    }
+    
+    private func isSelectedOrQueued(_ track: Track) -> Bool {
+        return Party.tracksQueue(hasTrack: track) || libraryTracksSelected.contains(where: { $0.id == track.id })
     }
     
     // MARK: - Navigation

@@ -57,7 +57,7 @@ class Party: NSObject, NSCoding {
     }
     
     static func tracksQueue(hasTrack track: Track) -> Bool {
-        return Party.tracksQueue.contains(where: { $0.id == track.id })
+        return Party.tracksQueue.contains(where: { $0.hasSameIdentity(as: track) })
     }
     
     // MARK: - NSCoding

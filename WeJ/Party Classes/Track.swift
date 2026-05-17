@@ -12,6 +12,7 @@ import MediaPlayer
 class Track: NSObject, NSCoding, NSCopying {
     
     var id = String()
+    var libraryID = String()
     var name = String()
     var artist = String()
     
@@ -62,10 +63,12 @@ class Track: NSObject, NSCoding, NSCopying {
             let newTrack = Track()
             
             newTrack.id = String(track.persistentID)
+            newTrack.libraryID = newTrack.id
             newTrack.name = track.title ?? ""
             newTrack.artist = track.artist ?? ""
             newTrack.lowResArtwork = track.artwork?.image(at: CGSize(width: 60, height: 60)) ?? #imageLiteral(resourceName: "stockArtwork")
             newTrack.highResArtwork = track.artwork?.image(at: CGSize(width: 400, height: 400))
+            newTrack.length = track.playbackDuration
             newTrack.isFromLibrary = true
             
             newTracks.append(newTrack)
@@ -76,6 +79,7 @@ class Track: NSObject, NSCoding, NSCopying {
     
     func encode(with aCoder: NSCoder) {
         aCoder.encode(id, forKey: "id")
+        aCoder.encode(libraryID, forKey: "libraryID")
         aCoder.encode(name, forKey: "name")
         aCoder.encode(artist, forKey: "artist")
         aCoder.encode(lowResArtworkURL, forKey: "lowResArtworkURL")
@@ -88,6 +92,7 @@ class Track: NSObject, NSCoding, NSCopying {
     
     convenience required init?(coder aDecoder: NSCoder) {
         let id = aDecoder.decodeObject(forKey: "id") as! String
+        let libraryID = aDecoder.decodeObject(forKey: "libraryID") as? String
         let name = aDecoder.decodeObject(forKey: "name") as! String
         let artist = aDecoder.decodeObject(forKey: "artist") as! String
         let lowResArtworkURL = aDecoder.decodeObject(forKey: "lowResArtworkURL") as! String
@@ -100,6 +105,7 @@ class Track: NSObject, NSCoding, NSCopying {
         self.init()
         
         self.id = id
+        self.libraryID = libraryID ?? ""
         self.name = name
         self.artist = artist
         self.lowResArtworkURL = lowResArtworkURL
@@ -113,6 +119,7 @@ class Track: NSObject, NSCoding, NSCopying {
     func copy(with zone: NSZone? = nil) -> Any {
         let copy = Track()
         copy.id = id
+        copy.libraryID = libraryID
         copy.name = name
         copy.artist = artist
         
@@ -124,5 +131,25 @@ class Track: NSObject, NSCoding, NSCopying {
         copy.length = length
         copy.isFromLibrary = isFromLibrary
         return copy
+    }
+    
+    func hasSameIdentity(as track: Track) -> Bool {
+        if !id.isEmpty && id == track.id {
+            return true
+        }
+        
+        if !libraryID.isEmpty && libraryID == track.libraryID {
+            return true
+        }
+        
+        if !libraryID.isEmpty && libraryID == track.id {
+            return true
+        }
+        
+        if !track.libraryID.isEmpty && id == track.libraryID {
+            return true
+        }
+        
+        return false
     }
 }

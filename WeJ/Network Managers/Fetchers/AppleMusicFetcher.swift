@@ -236,6 +236,7 @@ class AppleMusicFetcher: Fetcher {
                 }
 
                 if let track = foundTrack {
+                    track.libraryID = libraryTrack.libraryID.isEmpty ? libraryTrack.id : libraryTrack.libraryID
                     if !Party.tracksQueue(hasTrack: track) {
                         await MainActor.run {
                             trackHandler(track)
