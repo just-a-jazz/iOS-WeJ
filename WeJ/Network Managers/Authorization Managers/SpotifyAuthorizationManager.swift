@@ -311,19 +311,18 @@ class SpotifyAuthorizationManager: NSObject, AuthorizationManager, SPTSessionMan
     
     private func storeWebTokens(accessToken: String, refreshToken: String?, expiresIn: Double) {
         let expiryDate = Date.now.addingTimeInterval(expiresIn - 60)
-        let defaults = UserDefaults.standard
-        defaults.set(accessToken, forKey: SpotifyAuthorizationManager.webAccessTokenDefaultsKey)
-        defaults.set(expiryDate, forKey: SpotifyAuthorizationManager.webTokenExpiryDefaultsKey)
+        KeychainStore.set(accessToken, forKey: SpotifyAuthorizationManager.webAccessTokenDefaultsKey)
+        UserDefaults.standard.set(expiryDate, forKey: SpotifyAuthorizationManager.webTokenExpiryDefaultsKey)
         if let refreshToken = refreshToken {
-            defaults.set(refreshToken, forKey: SpotifyAuthorizationManager.webRefreshTokenDefaultsKey)
+            KeychainStore.set(refreshToken, forKey: SpotifyAuthorizationManager.webRefreshTokenDefaultsKey)
         }
-        defaults.synchronize()
+        removeLegacyStoredTokens()
     }
     
     private func loadStoredValidWebAccessToken() -> String? {
-        let defaults = UserDefaults.standard
-        guard let token = defaults.string(forKey: SpotifyAuthorizationManager.webAccessTokenDefaultsKey),
-              let expiryDate = defaults.object(forKey: SpotifyAuthorizationManager.webTokenExpiryDefaultsKey) as? Date,
+        migrateLegacyStoredTokensIfNeeded()
+        guard let token = KeychainStore.string(forKey: SpotifyAuthorizationManager.webAccessTokenDefaultsKey),
+              let expiryDate = UserDefaults.standard.object(forKey: SpotifyAuthorizationManager.webTokenExpiryDefaultsKey) as? Date,
               expiryDate > Date.now else {
             return nil
         }
@@ -332,17 +331,40 @@ class SpotifyAuthorizationManager: NSObject, AuthorizationManager, SPTSessionMan
     }
     
     private func loadStoredWebRefreshToken() -> String? {
-        return UserDefaults.standard.string(forKey: SpotifyAuthorizationManager.webRefreshTokenDefaultsKey)
+        migrateLegacyStoredTokensIfNeeded()
+        return KeychainStore.string(forKey: SpotifyAuthorizationManager.webRefreshTokenDefaultsKey)
     }
 
     static func clearStoredWebTokens() {
+        KeychainStore.removeValue(forKey: SpotifyAuthorizationManager.webAccessTokenDefaultsKey)
+        KeychainStore.removeValue(forKey: SpotifyAuthorizationManager.webRefreshTokenDefaultsKey)
+        let defaults = UserDefaults.standard
+        defaults.removeObject(forKey: SpotifyAuthorizationManager.webTokenExpiryDefaultsKey)
+        defaults.removeObject(forKey: SpotifyAuthorizationManager.webAccessTokenDefaultsKey)
+        defaults.removeObject(forKey: SpotifyAuthorizationManager.webRefreshTokenDefaultsKey)
+        Party.spotifyAccessToken = nil
+        shared.sessionManager.session = nil
+    }
+    
+    private func migrateLegacyStoredTokensIfNeeded() {
+        let defaults = UserDefaults.standard
+        if KeychainStore.string(forKey: SpotifyAuthorizationManager.webAccessTokenDefaultsKey) == nil,
+           let accessToken = defaults.string(forKey: SpotifyAuthorizationManager.webAccessTokenDefaultsKey) {
+            KeychainStore.set(accessToken, forKey: SpotifyAuthorizationManager.webAccessTokenDefaultsKey)
+        }
+        
+        if KeychainStore.string(forKey: SpotifyAuthorizationManager.webRefreshTokenDefaultsKey) == nil,
+           let refreshToken = defaults.string(forKey: SpotifyAuthorizationManager.webRefreshTokenDefaultsKey) {
+            KeychainStore.set(refreshToken, forKey: SpotifyAuthorizationManager.webRefreshTokenDefaultsKey)
+        }
+        
+        removeLegacyStoredTokens()
+    }
+    
+    private func removeLegacyStoredTokens() {
         let defaults = UserDefaults.standard
         defaults.removeObject(forKey: SpotifyAuthorizationManager.webAccessTokenDefaultsKey)
         defaults.removeObject(forKey: SpotifyAuthorizationManager.webRefreshTokenDefaultsKey)
-        defaults.removeObject(forKey: SpotifyAuthorizationManager.webTokenExpiryDefaultsKey)
-        defaults.synchronize()
-        Party.spotifyAccessToken = nil
-        shared.sessionManager.session = nil
     }
     
     // MARK: - Alerts

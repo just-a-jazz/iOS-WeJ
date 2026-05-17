@@ -65,6 +65,7 @@
 		99E05000123D800F309A600D /* Pods_WeJ.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FB7198514224E0BBDF2873C4 /* Pods_WeJ.framework */; };
 		FC2632EB2F61040E00313190 /* PrivateConfig.template.swift in Sources */ = {isa = PBXBuildFile; fileRef = FC2632EA2F61040E00313190 /* PrivateConfig.template.swift */; };
 		FC4489842FB8417F00BE84FA /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = FC4489832FB8417F00BE84FA /* PrivacyInfo.xcprivacy */; };
+		FC4489862FB95ADB00BE84FA /* KeychainStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = FC4489852FB95ADB00BE84FA /* KeychainStore.swift */; };
 		FC5B37A42EFB281200DA9553 /* PrivateConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = FC5B37A32EFB280F00DA9553 /* PrivateConfig.swift */; };
 		FC5B37A72EFCF0F500DA9553 /* SpotifyiOS.xcframework in Frameworks */ = {isa = PBXBuildFile; fileRef = FC5B37A52EFCF0E500DA9553 /* SpotifyiOS.xcframework */; };
 		FC5B37A82EFCF0F500DA9553 /* SpotifyiOS.xcframework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = FC5B37A52EFCF0E500DA9553 /* SpotifyiOS.xcframework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
@@ -163,6 +164,7 @@
 		FB7198514224E0BBDF2873C4 /* Pods_WeJ.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_WeJ.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		FC2632EA2F61040E00313190 /* PrivateConfig.template.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrivateConfig.template.swift; sourceTree = "<group>"; };
 		FC4489832FB8417F00BE84FA /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
+		FC4489852FB95ADB00BE84FA /* KeychainStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeychainStore.swift; sourceTree = "<group>"; };
 		FC5B37A32EFB280F00DA9553 /* PrivateConfig.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrivateConfig.swift; sourceTree = "<group>"; };
 		FC5B37A52EFCF0E500DA9553 /* SpotifyiOS.xcframework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcframework; path = SpotifyiOS.xcframework; sourceTree = "<group>"; };
 		FC5B37EC2F4850B500DA9553 /* SelectionCountBadgePresenting.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SelectionCountBadgePresenting.swift; sourceTree = "<group>"; };
@@ -404,6 +406,7 @@
 			children = (
 				41A279ED1F28FF0A00C218A2 /* AppleMusicAuthorizationManager.swift */,
 				41A279EF1F29141100C218A2 /* SpotifyAuthorizationManager.swift */,
+				FC4489852FB95ADB00BE84FA /* KeychainStore.swift */,
 			);
 			name = "Authorization Managers";
 			sourceTree = "<group>";
@@ -616,6 +619,7 @@
 				416A25D51F3F76DD008F7D19 /* LibraryTracksViewController.swift in Sources */,
 				417C38EA1DDA91A100F59926 /* PartyCreationViewController.swift in Sources */,
 				4116887C1F2F248300C3CD4A /* AppleMusicURLFactory.swift in Sources */,
+				FC4489862FB95ADB00BE84FA /* KeychainStore.swift in Sources */,
 				34D750E01E32E9C5009AFD63 /* MultipeerManager.swift in Sources */,
 				411688791F2F236F00C3CD4A /* AppleMusicFetcher.swift in Sources */,
 				417B9D571E31CD8D0021F36E /* TrackTableViewCell.swift in Sources */,
