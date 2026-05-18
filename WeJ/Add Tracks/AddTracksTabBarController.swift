@@ -21,6 +21,7 @@ class AddTracksTabBarController: UITabBarController, UITabBarControllerDelegate,
     }
     
     fileprivate var previousScrollOffset: CGFloat = 0
+    fileprivate var isAdjustingLibraryHeaderDuringCurrentDrag = false
     
     var libraryTracksSelected = [Track]() {
         didSet {
@@ -86,6 +87,9 @@ class AddTracksTabBarController: UITabBarController, UITabBarControllerDelegate,
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        if #available(iOS 13.0, *) {
+            overrideUserInterfaceStyle = .dark
+        }
         setDelegates()
         
         adjustViews()
@@ -114,6 +118,8 @@ class AddTracksTabBarController: UITabBarController, UITabBarControllerDelegate,
     
     private func configureTabBarAppearance() {
         tabBar.isTranslucent = false
+        tabBar.tintColor = AppConstants.orange
+        tabBar.unselectedItemTintColor = .white
         tabBar.barTintColor = AppConstants.darkerBlack
         tabBar.backgroundColor = AppConstants.darkerBlack
         tabBar.shadowImage = UIImage()
@@ -226,13 +232,13 @@ class AddTracksTabBarController: UITabBarController, UITabBarControllerDelegate,
     }
 
     private func addToLibraryQueue(track: Track) {
-        if !libraryTracksSelected.contains(where: { $0.id == track.id }) {
+        if !Party.tracksQueue(hasTrack: track) && !libraryTracksSelected.contains(where: { $0.hasSameIdentity(as: track) }) {
             libraryTracksSelected.append(track)
         }
     }
 
     private func removeFromLibraryQueue(track: Track) {
-        if let index = libraryTracksSelected.index(where: { $0.id == track.id }) {
+        if let index = libraryTracksSelected.index(where: { $0.hasSameIdentity(as: track) }) {
             libraryTracksSelected.remove(at: index)
         }
     }
@@ -435,17 +441,21 @@ private final class AddTracksPresentationController: UIPresentationController, U
             return false
         }
         
+        let topLibraryController = (controller.selectedViewController as? UINavigationController)?.topViewController
+        let isOnLibraryRoot = topLibraryController === hubController
+        let isLibraryHeaderExpanded = hubController.headerHeightConstraint.constant >= 279.5
+        
         if let touchedScrollView = scrollViewAtDismissalPanLocation(panGesture) {
+            if touchedScrollView === hubController.tracksTableView && isOnLibraryRoot {
+                return isLibraryHeaderExpanded && isAtTop(touchedScrollView)
+            }
             return isAtTop(touchedScrollView)
         }
         
-        let topLibraryController = (controller.selectedViewController as? UINavigationController)?.topViewController
         if topLibraryController is PlaylistSelectionViewController {
             return true
         }
         
-        let isOnLibraryRoot = topLibraryController === hubController
-        let isLibraryHeaderExpanded = hubController.headerHeightConstraint.constant >= 279.5
         return isOnLibraryRoot && isLibraryHeaderExpanded
     }
     
@@ -557,28 +567,32 @@ extension AddTracksTabBarController {
     
     // Code taken from https://michiganlabs.com/ios/development/2016/05/31/ios-animating-uitableview-header/
     func scrollViewDidScroll(_ scrollView: UIScrollView) {
+        guard scrollView == myHubController.tracksTableView else { return }
+        
         let scrollDiff = scrollView.contentOffset.y - previousScrollOffset
         
         let absoluteTop: CGFloat = 0
         
         let isScrollingDown = scrollDiff > 0 && scrollView.contentOffset.y > absoluteTop
-        let isPullingDown = scrollView.panGestureRecognizer.translation(in: scrollView).y > 0
+        let isPullingDown = scrollView.panGestureRecognizer.velocity(in: scrollView).y > 0
         let isScrollingUp = scrollDiff < 0
-            && scrollView.contentOffset.y <= absoluteTop
             && isPullingDown
+            && (scrollView.contentOffset.y <= absoluteTop || isAdjustingLibraryHeaderDuringCurrentDrag)
         
         var newHeight = myHubController.headerHeightConstraint.constant
         
         if isScrollingDown {
             newHeight = max(maxHeight, myHubController.headerHeightConstraint.constant - abs(scrollDiff))
             if newHeight != myHubController.headerHeightConstraint.constant {
+                isAdjustingLibraryHeaderDuringCurrentDrag = true
                 myHubController.headerHeightConstraint.constant = newHeight
                 setScrollPosition(forOffset: previousScrollOffset)
             }
             
         } else if isScrollingUp {
             newHeight = min(minHeight, myHubController.headerHeightConstraint.constant + abs(scrollDiff))
-            if newHeight != myHubController.headerHeightConstraint.constant && scrollView.contentOffset.y <= absoluteTop {
+            if newHeight != myHubController.headerHeightConstraint.constant {
+                isAdjustingLibraryHeaderDuringCurrentDrag = true
                 myHubController.headerHeightConstraint.constant = newHeight
                 setScrollPosition(forOffset: previousScrollOffset)
             }
@@ -591,13 +605,25 @@ extension AddTracksTabBarController {
         myHubController.tracksTableView.contentOffset = CGPoint(x: myHubController.tracksTableView.contentOffset.x, y: offset)
     }
     
+    func scrollViewWillBeginDragging(_ scrollView: UIScrollView) {
+        if scrollView == myHubController.tracksTableView {
+            isAdjustingLibraryHeaderDuringCurrentDrag = false
+        }
+    }
+    
     func scrollViewDidEndDecelerating(_ scrollView: UIScrollView) {
         scrollViewDidStopScrolling()
+        if scrollView == myHubController.tracksTableView {
+            isAdjustingLibraryHeaderDuringCurrentDrag = false
+        }
     }
     
     func scrollViewDidEndDragging(_ scrollView: UIScrollView, willDecelerate decelerate: Bool) {
         if !decelerate {
             scrollViewDidStopScrolling()
+            if scrollView == myHubController.tracksTableView {
+                isAdjustingLibraryHeaderDuringCurrentDrag = false
+            }
         }
     }
     

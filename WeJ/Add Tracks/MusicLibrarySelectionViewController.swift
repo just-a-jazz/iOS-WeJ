@@ -63,7 +63,7 @@ class MusicLibrarySelectionViewController: UIViewController, ViewControllerAcces
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        view.backgroundColor = AppConstants.darkerBlack
+        view.backgroundColor = AppConstants.black
         view.isOpaque = true
         navigationController?.view.backgroundColor = AppConstants.darkerBlack
         hideNavigationBar()
@@ -103,7 +103,7 @@ class MusicLibrarySelectionViewController: UIViewController, ViewControllerAcces
     
     private func adjustViews() {
         tracksTableView.contentInset = UIEdgeInsets(top: 0, left: 0, bottom: 50, right: 0)
-        tracksTableView.backgroundColor = AppConstants.darkerBlack
+        tracksTableView.backgroundColor = .clear
     }
 
     private var mostPlayedTopConstraint: NSLayoutConstraint?
