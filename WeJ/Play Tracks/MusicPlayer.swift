@@ -124,7 +124,6 @@ class MusicPlayer: NSObject, SPTAppRemoteDelegate, SPTAppRemotePlayerStateDelega
             }
         } else {
             delegate?.alertPreviousiOSVersionUsers()
-            BackgroundTask.startBackgroundTask()
             if #available(iOS 10.1, *) {
                 let capturedTrackID = Party.tracksQueue.first?.id
                 appleMusicPlayer.prepareToPlay { (_) in
