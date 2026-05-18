@@ -251,6 +251,12 @@ extension AddTracksTabBarController: UIViewControllerTransitioningDelegate {
         return AddTracksPresentationController(presentedViewController: presented, presenting: presenting)
     }
     
+    func animationController(forPresented presented: UIViewController,
+                             presenting: UIViewController,
+                             source: UIViewController) -> UIViewControllerAnimatedTransitioning? {
+        return AddTracksPresentationAnimator()
+    }
+    
     func animationController(forDismissed dismissed: UIViewController) -> UIViewControllerAnimatedTransitioning? {
         return AddTracksDismissalAnimator()
     }
@@ -263,6 +269,7 @@ private final class AddTracksPresentationController: UIPresentationController, U
     private var dismissalPanGesture: UIPanGestureRecognizer?
     private weak var activeDismissalScrollView: UIScrollView?
     private var presentedFrame: CGRect = .zero
+    private var isPresenting = false
     private var isTrackingDismissal = false
     
     override var shouldPresentInFullscreen: Bool {
@@ -294,10 +301,16 @@ private final class AddTracksPresentationController: UIPresentationController, U
     override func presentationTransitionWillBegin() {
         guard let containerView = containerView else { return }
         
-        backdropView.frame = frameOfPresentedViewInContainerView
+        isPresenting = true
+        presentedFrame = frameOfPresentedViewInContainerView
+        backdropView.frame = offscreenFrame(from: presentedFrame, in: containerView)
         containerView.insertSubview(backdropView, at: 0)
         configurePresentedViewAppearance()
         addDismissalGestureIfNeeded()
+        
+        presentedViewController.transitionCoordinator?.animate(alongsideTransition: { _ in
+            self.backdropView.frame = self.presentedFrame
+        })
     }
     
     override func dismissalTransitionWillBegin() {
@@ -311,11 +324,20 @@ private final class AddTracksPresentationController: UIPresentationController, U
     override func containerViewWillLayoutSubviews() {
         super.containerViewWillLayoutSubviews()
         presentedFrame = frameOfPresentedViewInContainerView
-        backdropView.frame = presentedFrame
-        if !isTrackingDismissal {
-            presentedView?.frame = presentedFrame
+        if !isPresenting {
+            backdropView.frame = presentedFrame
+            if !isTrackingDismissal {
+                presentedView?.frame = presentedFrame
+            }
         }
         configurePresentedViewAppearance()
+    }
+    
+    override func presentationTransitionDidEnd(_ completed: Bool) {
+        isPresenting = false
+        if !completed {
+            backdropView.removeFromSuperview()
+        }
     }
     
     override func dismissalTransitionDidEnd(_ completed: Bool) {
@@ -339,6 +361,10 @@ private final class AddTracksPresentationController: UIPresentationController, U
         
         configureRoundedTopCorners(for: backdropView)
         configureRoundedTopCorners(for: presentedView)
+    }
+    
+    private func offscreenFrame(from frame: CGRect, in containerView: UIView) -> CGRect {
+        return frame.offsetBy(dx: 0, dy: containerView.bounds.height - frame.minY)
     }
     
     private func configureRoundedTopCorners(for view: UIView) {
@@ -463,6 +489,36 @@ private final class AddTracksPresentationController: UIPresentationController, U
             return false
         }
         return canBeginInteractiveDismissal(from: panGesture)
+    }
+    
+}
+
+private final class AddTracksPresentationAnimator: NSObject, UIViewControllerAnimatedTransitioning {
+    
+    func transitionDuration(using transitionContext: UIViewControllerContextTransitioning?) -> TimeInterval {
+        return 0.28
+    }
+    
+    func animateTransition(using transitionContext: UIViewControllerContextTransitioning) {
+        guard let presentedView = transitionContext.view(forKey: .to),
+              let presentedController = transitionContext.viewController(forKey: .to) else {
+            transitionContext.completeTransition(!transitionContext.transitionWasCancelled)
+            return
+        }
+        
+        let containerView = transitionContext.containerView
+        let finalFrame = transitionContext.finalFrame(for: presentedController)
+        presentedView.frame = finalFrame.offsetBy(dx: 0, dy: containerView.bounds.height - finalFrame.minY)
+        containerView.addSubview(presentedView)
+        
+        UIView.animate(withDuration: transitionDuration(using: transitionContext),
+                       delay: 0,
+                       options: [.curveEaseOut],
+                       animations: {
+            presentedView.frame = finalFrame
+        }, completion: { finished in
+            transitionContext.completeTransition(finished && !transitionContext.transitionWasCancelled)
+        })
     }
     
 }
