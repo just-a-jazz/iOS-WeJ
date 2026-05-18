@@ -42,6 +42,13 @@ class QueueViewController: UIViewController, UITableViewDelegate, UITableViewDat
         updateEditButtonForHeaderState()
     }
     
+    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
+        if segue.identifier == "Add Tracks",
+           let addTracksController = segue.destination as? AddTracksTabBarController {
+            addTracksController.configureCustomPresentation()
+        }
+    }
+    
     private func adjustFontSizes() {
         if UIDevice.deviceType == .iPhone4_4s || UIDevice.deviceType == .iPhone5_5s_SE {
             addButton.changeToSmallerFont()

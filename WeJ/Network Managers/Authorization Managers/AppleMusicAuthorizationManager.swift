@@ -114,7 +114,7 @@ class AppleMusicAuthorizationManager: NSObject, AuthorizationManager {
     private static func handleAuthorization() async {
         guard Party.appleMusicStorefront == nil else {
             await MainActor.run {
-                delegate?.performSegue(withIdentifier: storyboardSegue, sender: nil)
+                delegate?.completeAuthorization(withSegueIdentifier: storyboardSegue)
                 delegate?.processingLogin = false
             }
             return

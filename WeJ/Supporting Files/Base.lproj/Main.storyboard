@@ -715,7 +715,10 @@
                     <connections>
                         <outlet property="activityIndicator" destination="cGQ-h4-hnW" id="OwY-YQ-iTL"/>
                         <outlet property="doneButton" destination="iyS-xC-gDD" id="0bw-Hd-arE"/>
+                        <outlet property="doneButtonWidthConstraint" destination="gWl-HH-9d2" id="JbM-Xe-fxv"/>
                         <outlet property="noTracksFoundLabel" destination="glb-s6-mJW" id="k0N-em-j1M"/>
+                        <outlet property="searchHeaderTopConstraint" destination="bEC-PQ-pXa" id="CLx-rn-0Ni"/>
+                        <outlet property="searchHeaderTrailingConstraint" destination="paL-aL-LiW" id="R7o-Ox-lUo"/>
                         <outlet property="searchTracksField" destination="9uC-0w-dVM" id="dk3-xv-kXq"/>
                         <outlet property="trackTableView" destination="aDO-Zv-db3" id="dFF-In-Kof"/>
                     </connections>
@@ -934,7 +937,7 @@
         <!--Playlist Selection View Controller-->
         <scene sceneID="cqY-Jy-zrZ">
             <objects>
-                <viewController id="jUi-2l-rSL" customClass="PlaylistSelectionViewController" customModule="WeJ" customModuleProvider="target" sceneMemberID="viewController">
+                <viewController storyboardIdentifier="PlaylistSelection" id="jUi-2l-rSL" customClass="PlaylistSelectionViewController" customModule="WeJ" customModuleProvider="target" sceneMemberID="viewController">
                     <view key="view" contentMode="scaleToFill" id="FTD-PX-IBZ">
                         <rect key="frame" x="0.0" y="0.0" width="375" height="329"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>

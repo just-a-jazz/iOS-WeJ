@@ -109,7 +109,7 @@ class SpotifyAuthorizationManager: NSObject, AuthorizationManager, SPTSessionMan
     
     private func completeAuthorization() {
         DispatchQueue.main.async {
-            SpotifyAuthorizationManager.delegate?.performSegue(withIdentifier: SpotifyAuthorizationManager.storyboardSegue, sender: nil)
+            SpotifyAuthorizationManager.delegate?.completeAuthorization(withSegueIdentifier: SpotifyAuthorizationManager.storyboardSegue)
         }
     }
     

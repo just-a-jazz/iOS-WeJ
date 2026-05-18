@@ -56,6 +56,7 @@ class PlaylistSubcategorySelectionViewController: UIViewController, UITableViewD
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        applyAddTracksPushedPageAppearance()
         
         setupSelectionCountBadge()
         initializeVariables()

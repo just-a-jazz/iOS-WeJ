@@ -45,6 +45,7 @@ class PlaylistSelectionViewController: UIViewController, SelectionCountBadgePres
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        applyAddTracksPushedPageAppearance()
         setupSelectionCountBadge()
         adjustViews()
         adjustFontSizes()

@@ -216,6 +216,21 @@ class MusicLibrarySelectionViewController: UIViewController, ViewControllerAcces
             showAppleMusicLibrary()
         }
     }
+    
+    func completeAuthorization(withSegueIdentifier identifier: String) {
+        guard identifier == "Show Spotify Library" || identifier == "Show Apple Music Library" else {
+            performSegue(withIdentifier: identifier, sender: nil)
+            return
+        }
+        
+        guard let controller = storyboard?.instantiateViewController(withIdentifier: "PlaylistSelection") as? PlaylistSelectionViewController else {
+            performSegue(withIdentifier: identifier, sender: nil)
+            return
+        }
+        
+        controller.musicService = libraryMusicService
+        navigationController?.pushViewController(controller, animated: true)
+    }
 
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
         if let controller = segue.destination as? PlaylistSelectionViewController {

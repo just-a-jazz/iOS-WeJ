@@ -13,6 +13,7 @@ protocol ViewControllerAccessDelegate: class {
     var processingLogin: Bool { get set }
     func present(_ viewControllerToPresent: UIViewController, animated flag: Bool, completion: (() -> Void)?)
     func performSegue(withIdentifier identifier: String, sender: Any?)
+    func completeAuthorization(withSegueIdentifier identifier: String)
     func tryAgain()
 }
 
@@ -164,6 +165,10 @@ class PartyCreationViewController: UIViewController, UITextFieldDelegate, ViewCo
     
     func tryAgain() {
         createParty()
+    }
+    
+    func completeAuthorization(withSegueIdentifier identifier: String) {
+        performSegue(withIdentifier: identifier, sender: nil)
     }
     
     // MARK: - Navigation

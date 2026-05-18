@@ -18,6 +18,9 @@ class SearchViewController: UIViewController, UITextFieldDelegate, SelectionCoun
     
     @IBOutlet weak var searchTracksField: searchTextField!
     @IBOutlet weak var doneButton: UIButton!
+    @IBOutlet weak var doneButtonWidthConstraint: NSLayoutConstraint!
+    @IBOutlet weak var searchHeaderTopConstraint: NSLayoutConstraint!
+    @IBOutlet weak var searchHeaderTrailingConstraint: NSLayoutConstraint!
     var badge: RKNotificationHub!
     var totalTracksCount: Int {
         let controller = tabBarController! as! AddTracksTabBarController
@@ -65,6 +68,11 @@ class SearchViewController: UIViewController, UITextFieldDelegate, SelectionCoun
         searchTracksField.resignFirstResponder()
     }
     
+    override func viewDidLayoutSubviews() {
+        super.viewDidLayoutSubviews()
+        alignHeaderWithMyMusicDoneButton()
+    }
+    
     // MARK: - Functions
     
     private func initializeVariables() {
@@ -91,6 +99,23 @@ class SearchViewController: UIViewController, UITextFieldDelegate, SelectionCoun
         if UIDevice.deviceType == .iPhone4_4s || UIDevice.deviceType == .iPhone5_5s_SE {
             searchTracksField.changeToSmallerFont()
             doneButton.changeToSmallerFont()
+        }
+    }
+    
+    private func alignHeaderWithMyMusicDoneButton() {
+        guard let targetFrame = delegate?.myMusicDoneButtonFrame(in: view) else { return }
+        let safeAreaTopY = view.safeAreaLayoutGuide.layoutFrame.minY
+        let alignedTopConstant = targetFrame.minY - safeAreaTopY
+        let alignedTrailingConstant = view.layoutMarginsGuide.layoutFrame.maxX - targetFrame.maxX
+        
+        if abs(searchHeaderTopConstraint.constant - alignedTopConstant) > 0.5 {
+            searchHeaderTopConstraint.constant = alignedTopConstant
+        }
+        if abs(searchHeaderTrailingConstraint.constant - alignedTrailingConstant) > 0.5 {
+            searchHeaderTrailingConstraint.constant = alignedTrailingConstant
+        }
+        if abs(doneButtonWidthConstraint.constant - targetFrame.width) > 0.5 {
+            doneButtonWidthConstraint.constant = targetFrame.width
         }
     }
     

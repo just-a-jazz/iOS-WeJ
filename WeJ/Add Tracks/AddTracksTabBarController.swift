@@ -34,6 +34,22 @@ class AddTracksTabBarController: UITabBarController, UITabBarControllerDelegate,
         }
     }
     
+    func configureCustomPresentation() {
+        modalPresentationStyle = .custom
+        transitioningDelegate = self
+    }
+    
+    func myMusicDoneButtonFrame(in targetView: UIView) -> CGRect? {
+        guard let myHubController = myHubController,
+              myHubController.isViewLoaded,
+              myHubController.doneButton != nil else {
+            return nil
+        }
+        
+        myHubController.view.layoutIfNeeded()
+        return myHubController.doneButton.convert(myHubController.doneButton.bounds, to: targetView)
+    }
+    
     private func tracksList(for tableView: UITableView) -> [Track] {
         // Use the calling table view to avoid mismatches during rapid tab switches.
         if let searchController = viewControllers?.compactMap({ $0 as? SearchViewController }).first,
@@ -95,7 +111,7 @@ class AddTracksTabBarController: UITabBarController, UITabBarControllerDelegate,
             item.imageInsets = UIEdgeInsets(top: 2, left: 0, bottom: -2, right: 0)
         }
     }
-
+    
     private func configureTabBarAppearance() {
         tabBar.isTranslucent = false
         tabBar.barTintColor = AppConstants.darkerBlack
@@ -225,6 +241,260 @@ class AddTracksTabBarController: UITabBarController, UITabBarControllerDelegate,
         return Party.musicService == .appleMusic && tableView == myHubController.tracksTableView
     }
 
+}
+
+extension AddTracksTabBarController: UIViewControllerTransitioningDelegate {
+    
+    func presentationController(forPresented presented: UIViewController,
+                                presenting: UIViewController?,
+                                source: UIViewController) -> UIPresentationController? {
+        return AddTracksPresentationController(presentedViewController: presented, presenting: presenting)
+    }
+    
+    func animationController(forDismissed dismissed: UIViewController) -> UIViewControllerAnimatedTransitioning? {
+        return AddTracksDismissalAnimator()
+    }
+    
+}
+
+private final class AddTracksPresentationController: UIPresentationController, UIGestureRecognizerDelegate {
+    
+    private let backdropView = UIView()
+    private var dismissalPanGesture: UIPanGestureRecognizer?
+    private weak var activeDismissalScrollView: UIScrollView?
+    private var presentedFrame: CGRect = .zero
+    private var isTrackingDismissal = false
+    
+    override var shouldPresentInFullscreen: Bool {
+        return false
+    }
+    
+    override var shouldRemovePresentersView: Bool {
+        return false
+    }
+    
+    override init(presentedViewController: UIViewController, presenting presentingViewController: UIViewController?) {
+        super.init(presentedViewController: presentedViewController, presenting: presentingViewController)
+        backdropView.backgroundColor = AppConstants.darkerBlack
+    }
+    
+    override var frameOfPresentedViewInContainerView: CGRect {
+        guard let containerView = containerView else { return .zero }
+        
+        let topInset = containerView.safeAreaInsets.top
+        let topOffset: CGFloat = topInset >= 40 ? 70 : 45
+        let yOrigin = min(topOffset, containerView.bounds.height)
+        let height = containerView.bounds.height - yOrigin
+        return CGRect(x: 0,
+                      y: yOrigin,
+                      width: containerView.bounds.width,
+                      height: height)
+    }
+    
+    override func presentationTransitionWillBegin() {
+        guard let containerView = containerView else { return }
+        
+        backdropView.frame = frameOfPresentedViewInContainerView
+        containerView.insertSubview(backdropView, at: 0)
+        configurePresentedViewAppearance()
+        addDismissalGestureIfNeeded()
+    }
+    
+    override func dismissalTransitionWillBegin() {
+        guard let containerView = containerView else { return }
+        
+        presentedViewController.transitionCoordinator?.animate(alongsideTransition: { _ in
+            self.backdropView.frame.origin.y = containerView.bounds.height
+        })
+    }
+    
+    override func containerViewWillLayoutSubviews() {
+        super.containerViewWillLayoutSubviews()
+        presentedFrame = frameOfPresentedViewInContainerView
+        backdropView.frame = presentedFrame
+        if !isTrackingDismissal {
+            presentedView?.frame = presentedFrame
+        }
+        configurePresentedViewAppearance()
+    }
+    
+    override func dismissalTransitionDidEnd(_ completed: Bool) {
+        if completed {
+            backdropView.removeFromSuperview()
+        }
+    }
+    
+    private func addDismissalGestureIfNeeded() {
+        guard dismissalPanGesture == nil, let containerView = containerView else { return }
+        
+        let panGesture = UIPanGestureRecognizer(target: self, action: #selector(handleDismissalPan(_:)))
+        panGesture.delegate = self
+        panGesture.cancelsTouchesInView = false
+        containerView.addGestureRecognizer(panGesture)
+        dismissalPanGesture = panGesture
+    }
+    
+    private func configurePresentedViewAppearance() {
+        guard let presentedView = presentedView else { return }
+        
+        configureRoundedTopCorners(for: backdropView)
+        configureRoundedTopCorners(for: presentedView)
+    }
+    
+    private func configureRoundedTopCorners(for view: UIView) {
+        if #available(iOS 26.0, *) {
+            view.layer.cornerRadius = 32
+            view.layer.cornerCurve = .continuous
+            view.layer.maskedCorners = [.layerMinXMinYCorner, .layerMaxXMinYCorner]
+            view.layer.masksToBounds = true
+        } else {
+            view.layer.cornerRadius = 0
+            view.layer.masksToBounds = false
+        }
+    }
+    
+    @objc private func handleDismissalPan(_ gesture: UIPanGestureRecognizer) {
+        guard let presentedView = presentedView,
+              let containerView = containerView else { return }
+        
+        let translationY = max(gesture.translation(in: containerView).y, 0)
+        switch gesture.state {
+        case .began:
+            isTrackingDismissal = true
+            presentedFrame = presentedView.frame
+            activeDismissalScrollView = scrollViewAtDismissalPanLocation(gesture)
+            activeDismissalScrollView?.isScrollEnabled = false
+        case .changed:
+            presentedView.frame = presentedFrame.offsetBy(dx: 0, dy: translationY)
+            backdropView.frame = presentedView.frame
+        case .ended, .cancelled, .failed:
+            let velocityY = gesture.velocity(in: containerView).y
+            if translationY > 120 || velocityY > 900 {
+                let remainingDistance = containerView.bounds.height - presentedView.frame.minY
+                let duration = max(0.12, min(0.28, TimeInterval(remainingDistance / max(velocityY, 900))))
+                UIView.animate(withDuration: duration,
+                               delay: 0,
+                               options: [.curveEaseOut],
+                               animations: {
+                    presentedView.frame.origin.y = containerView.bounds.height
+                    self.backdropView.frame = presentedView.frame
+                }, completion: { _ in
+                    self.isTrackingDismissal = false
+                    self.activeDismissalScrollView?.isScrollEnabled = true
+                    self.activeDismissalScrollView = nil
+                    self.presentedViewController.dismiss(animated: false)
+                })
+            } else {
+                UIView.animate(withDuration: 0.2, animations: {
+                    presentedView.frame = self.presentedFrame
+                    self.backdropView.frame = self.presentedFrame
+                }, completion: { _ in
+                    self.isTrackingDismissal = false
+                    self.activeDismissalScrollView?.isScrollEnabled = true
+                    self.activeDismissalScrollView = nil
+                })
+            }
+        default:
+            break
+        }
+    }
+    
+    private var addTracksController: AddTracksTabBarController? {
+        return presentedViewController as? AddTracksTabBarController
+    }
+    
+    private func canBeginInteractiveDismissal(from panGesture: UIPanGestureRecognizer) -> Bool {
+        guard let controller = addTracksController,
+              let hubController = controller.myHubController else {
+            return false
+        }
+        
+        if let touchedScrollView = scrollViewAtDismissalPanLocation(panGesture) {
+            return isAtTop(touchedScrollView)
+        }
+        
+        let topLibraryController = (controller.selectedViewController as? UINavigationController)?.topViewController
+        if topLibraryController is PlaylistSelectionViewController {
+            return true
+        }
+        
+        let isOnLibraryRoot = topLibraryController === hubController
+        let isLibraryHeaderExpanded = hubController.headerHeightConstraint.constant >= 279.5
+        return isOnLibraryRoot && isLibraryHeaderExpanded
+    }
+    
+    private func scrollViewAtDismissalPanLocation(_ panGesture: UIPanGestureRecognizer) -> UIScrollView? {
+        guard let containerView = containerView else { return nil }
+        let location = panGesture.location(in: containerView)
+        return enclosingScrollView(from: containerView.hitTest(location, with: nil))
+    }
+    
+    private func enclosingScrollView(from view: UIView?) -> UIScrollView? {
+        var currentView = view
+        while let view = currentView {
+            if let scrollView = view as? UIScrollView {
+                return scrollView
+            }
+            currentView = view.superview
+        }
+        return nil
+    }
+    
+    private func isAtTop(_ scrollView: UIScrollView) -> Bool {
+        let topOffset = -scrollView.adjustedContentInset.top
+        return scrollView.contentOffset.y <= topOffset + 0.5
+    }
+    
+    func gestureRecognizerShouldBegin(_ gestureRecognizer: UIGestureRecognizer) -> Bool {
+        guard gestureRecognizer == dismissalPanGesture,
+              let panGesture = gestureRecognizer as? UIPanGestureRecognizer,
+              let containerView = containerView else {
+            return true
+        }
+        
+        let velocity = panGesture.velocity(in: containerView)
+        return velocity.y > abs(velocity.x) && canBeginInteractiveDismissal(from: panGesture)
+    }
+    
+    func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer,
+                           shouldRecognizeSimultaneouslyWith otherGestureRecognizer: UIGestureRecognizer) -> Bool {
+        guard gestureRecognizer == dismissalPanGesture,
+              let panGesture = gestureRecognizer as? UIPanGestureRecognizer else {
+            return false
+        }
+        return canBeginInteractiveDismissal(from: panGesture)
+    }
+    
+}
+
+private final class AddTracksDismissalAnimator: NSObject, UIViewControllerAnimatedTransitioning {
+    
+    func transitionDuration(using transitionContext: UIViewControllerContextTransitioning?) -> TimeInterval {
+        return 0.25
+    }
+    
+    func animateTransition(using transitionContext: UIViewControllerContextTransitioning) {
+        guard let dismissedView = transitionContext.view(forKey: .from),
+              let dismissedController = transitionContext.viewController(forKey: .from) else {
+            transitionContext.completeTransition(!transitionContext.transitionWasCancelled)
+            return
+        }
+        
+        let viewToAnimate = (dismissedController as? AddTracksTabBarController)?.view
+            ?? dismissedController.tabBarController?.view
+            ?? dismissedView
+        
+        let duration = transitionDuration(using: transitionContext)
+        UIView.animate(withDuration: duration,
+                       delay: 0,
+                       options: [.curveEaseInOut],
+                       animations: {
+            viewToAnimate.frame.origin.y = transitionContext.containerView.bounds.height
+        }, completion: { finished in
+            transitionContext.completeTransition(finished && !transitionContext.transitionWasCancelled)
+        })
+    }
+    
 }
 
 extension AddTracksTabBarController {

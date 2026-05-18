@@ -7,7 +7,28 @@
 //
 
 import Foundation
+import UIKit
 import M13Checkbox
+
+extension UIViewController {
+    
+    func applyAddTracksPushedPageAppearance() {
+        view.backgroundColor = AppConstants.darkerBlack
+        navigationController?.view.backgroundColor = AppConstants.darkerBlack
+        tabBarController?.view.backgroundColor = AppConstants.darkerBlack
+        
+        [tabBarController?.view, navigationController?.view, view].forEach { containerView in
+            guard let containerView = containerView else { return }
+            if #available(iOS 26.0, *) {
+                containerView.layer.cornerRadius = 32
+                containerView.layer.cornerCurve = .continuous
+                containerView.layer.maskedCorners = [.layerMinXMinYCorner, .layerMaxXMinYCorner]
+                containerView.layer.masksToBounds = true
+            }
+        }
+    }
+    
+}
 
 extension UIView {
     

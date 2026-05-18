@@ -71,6 +71,7 @@ class LibraryTracksViewController: UIViewController, UITableViewDelegate, UITabl
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        applyAddTracksPushedPageAppearance()
         setupSelectionCountBadge()
         initializeVariables()
         
