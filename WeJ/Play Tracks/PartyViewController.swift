@@ -107,6 +107,7 @@ class PartyViewController: UIViewController, MusicPlayerDelegate, UpdatePartyDel
     private var lastQueueAdvanceAt: Date?
     private var lastManualAppleMusicSkipAt: Date?
     private var lastQueueStartAt: Date?
+    private var lastObservedAppleMusicPosition: TimeInterval?
     private var pendingAppleMusicUIWorkItem: DispatchWorkItem?
     
     // MARK: - Lifecycle
@@ -260,6 +261,11 @@ class PartyViewController: UIViewController, MusicPlayerDelegate, UpdatePartyDel
     private func setupControlEvents() {
         UIApplication.shared.beginReceivingRemoteControlEvents()
         
+        MPRemoteCommandCenter.shared().pauseCommand.removeTarget(nil)
+        MPRemoteCommandCenter.shared().playCommand.removeTarget(nil)
+        MPRemoteCommandCenter.shared().changePlaybackPositionCommand.removeTarget(nil)
+        MPRemoteCommandCenter.shared().nextTrackCommand.removeTarget(nil)
+        
         MPRemoteCommandCenter.shared().pauseCommand.addTarget { [weak self]  _-> MPRemoteCommandHandlerStatus in
             self?.musicPlayer.pauseTrack()
             return .success
@@ -279,9 +285,16 @@ class PartyViewController: UIViewController, MusicPlayerDelegate, UpdatePartyDel
         }
         
         MPRemoteCommandCenter.shared().nextTrackCommand.addTarget { [weak self] _ -> MPRemoteCommandHandlerStatus in
-            self?.skipTrack()
-            return .success
+            return self?.handleRemoteSkipCommand() ?? .commandFailed
         }
+    }
+    
+    private func handleRemoteSkipCommand() -> MPRemoteCommandHandlerStatus {
+        guard !Party.tracksQueue.isEmpty else {
+            return .noSuchContent
+        }
+        skipTrack()
+        return .success
     }
     
     private func updateControlCenter() {
@@ -544,6 +557,23 @@ class PartyViewController: UIViewController, MusicPlayerDelegate, UpdatePartyDel
 
     @objc private func appleMusicPlaybackStateDidChange() {
         guard Party.musicService == .appleMusic else { return }
+        let currentPosition = musicPlayer.currentPosition ?? -1
+        let previousPosition = lastObservedAppleMusicPosition
+        if musicPlayer.appleMusicPlayer.playbackState == .paused,
+           !Party.tracksQueue.isEmpty,
+           let previousPosition = previousPosition,
+           previousPosition > 1.0,
+           currentPosition >= 0,
+            currentPosition <= 0.1 {
+            let recentQueueAdvance = lastQueueAdvanceAt.map { Date.now.timeIntervalSince($0) < 1.0 } ?? false
+            if !recentQueueAdvance {
+                skipTrack()
+                lastObservedAppleMusicPosition = musicPlayer.currentPosition
+                return
+            }
+        }
+        
+        lastObservedAppleMusicPosition = currentPosition >= 0 ? currentPosition : nil
 
         if let lastSkipAt = lastManualAppleMusicSkipAt,
            Date.now.timeIntervalSince(lastSkipAt) < 0.6,
