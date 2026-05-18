@@ -42,7 +42,7 @@ class AppleMusicFetcher: Fetcher {
     
     func searchCatalog(forTerm term: String, completionHandler: @escaping () -> Void) {
         Task { [weak self] in
-            let developerToken = await AppleMusicAuthorizationManager.requestDeveloperToken()
+            let developerToken = await AppleMusicAuthorizationManager.ensureDeveloperToken()
             
             if developerToken != nil {
                 if let tracks = await self?.fetchCatalogTracksWithRestApi(forTerm: term) {

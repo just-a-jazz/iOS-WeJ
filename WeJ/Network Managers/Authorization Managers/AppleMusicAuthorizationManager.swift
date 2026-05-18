@@ -21,11 +21,13 @@ class AppleMusicAuthorizationManager: NSObject, AuthorizationManager {
     static weak var delegate: ViewControllerAccessDelegate?
     
     static var developerToken: String!
+    private static var developerTokenExpiryDate: Date?
     static var storyboardSegue: String!
     
     static func requestDeveloperToken() async -> String? {
         if !PrivateConfig.appleMusicDeveloperToken.isEmpty {
             developerToken = PrivateConfig.appleMusicDeveloperToken
+            developerTokenExpiryDate = expiryDate(fromJWT: developerToken)
             return developerToken
         }
 
@@ -39,19 +41,58 @@ class AppleMusicAuthorizationManager: NSObject, AuthorizationManager {
                     throw NSError(domain: "AppleMusicAuthorizationManager", code: 1)
                 }
                 developerToken = token
+                developerTokenExpiryDate = expiryDate(fromJWT: token)
             }
         } catch {
             developerToken = nil
+            developerTokenExpiryDate = nil
         }
 
         return developerToken
     }
 
     static func ensureDeveloperToken() async -> String? {
-        if let token = developerToken, !token.isEmpty {
+        if let token = developerToken,
+           !token.isEmpty,
+           isDeveloperTokenValid(token) {
             return token
         }
         return await requestDeveloperToken()
+    }
+
+    private static func isDeveloperTokenValid(_ token: String) -> Bool {
+        if let expiryDate = developerTokenExpiryDate ?? expiryDate(fromJWT: token) {
+            developerTokenExpiryDate = expiryDate
+            // Refresh slightly before actual expiry to avoid in-flight expiration.
+            return Date() < expiryDate.addingTimeInterval(-60)
+        }
+
+        // Fallback for non-JWT token formats.
+        return !token.isEmpty
+    }
+
+    private static func expiryDate(fromJWT token: String) -> Date? {
+        let components = token.split(separator: ".")
+        guard components.count >= 2 else { return nil }
+
+        let payloadBase64URL = String(components[1])
+        var payloadBase64 = payloadBase64URL
+            .replacingOccurrences(of: "-", with: "+")
+            .replacingOccurrences(of: "_", with: "/")
+
+        let remainder = payloadBase64.count % 4
+        if remainder > 0 {
+            payloadBase64 += String(repeating: "=", count: 4 - remainder)
+        }
+
+        guard let payloadData = Data(base64Encoded: payloadBase64),
+              let payloadObject = try? JSONSerialization.jsonObject(with: payloadData),
+              let payloadJSON = payloadObject as? [String: Any],
+              let exp = payloadJSON["exp"] as? TimeInterval else {
+            return nil
+        }
+
+        return Date(timeIntervalSince1970: exp)
     }
 
     static func ensureMediaLibraryAccess(completionHandler: @escaping (Bool) -> Void) {
