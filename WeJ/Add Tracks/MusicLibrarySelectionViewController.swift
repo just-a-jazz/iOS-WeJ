@@ -131,14 +131,16 @@ class MusicLibrarySelectionViewController: UIViewController, ViewControllerAcces
         let normalIcons = iconNames.compactMap { UIImage(named: $0) }
         let maxIconWidth = (normalIcons.map { $0.size.width }.max() ?? 0) * scale
         let gap: CGFloat = 12
+        let paddedIconWidth = maxIconWidth + gap
 
         for (index, button) in buttons.enumerated() where index < iconNames.count {
             guard let button else { continue }
-            let normalIcon = paddedIcon(named: iconNames[index], toWidth: maxIconWidth, scale: scale)
-            let highlightedIcon = paddedIcon(named: highlightedIconNames[index], toWidth: maxIconWidth, scale: scale)
+            let normalIcon = paddedIcon(named: iconNames[index], toWidth: paddedIconWidth, scale: scale)
+            let highlightedIcon = paddedIcon(named: highlightedIconNames[index], toWidth: paddedIconWidth, scale: scale)
 
-            button.setImage(normalIcon, for: .normal)
-            button.setImage(highlightedIcon, for: .highlighted)
+            button.configuration = nil
+            button.setImage(normalIcon?.withRenderingMode(.alwaysOriginal), for: .normal)
+            button.setImage(highlightedIcon?.withRenderingMode(.alwaysOriginal), for: .highlighted)
             button.contentHorizontalAlignment = .left
             button.semanticContentAttribute = .forceLeftToRight
             button.tintColor = .white
@@ -149,10 +151,7 @@ class MusicLibrarySelectionViewController: UIViewController, ViewControllerAcces
             button.titleLabel?.adjustsFontForContentSizeCategory = true
             button.titleLabel?.adjustsFontSizeToFitWidth = true
             button.titleLabel?.minimumScaleFactor = 0.75
-            var configuration = button.configuration ?? .plain()
-            configuration.contentInsets = .zero
-            configuration.imagePadding = gap
-            button.configuration = configuration
+
         }
     }
 
