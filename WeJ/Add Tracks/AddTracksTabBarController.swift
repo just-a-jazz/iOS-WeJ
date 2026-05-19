@@ -160,11 +160,19 @@ class AddTracksTabBarController: UITabBarController, UITabBarControllerDelegate,
         let list = tracksList(for: tableView)
         guard indexPath.row < list.count else { return }
         cell.backgroundColor = .clear
-        if Party.tracksQueue(hasTrack: list[indexPath.row]) || tracksSelected.contains(where: { $0.id == list[indexPath.row].id }) {
+
+        let track = list[indexPath.row]
+        let isSelected = Party.tracksQueue(hasTrack: track)
+            || tracksSelected.contains(where: { $0.id == track.id })
+            || (isAppleMusicLibrarySelection(for: tableView)
+                && libraryTracksSelected.contains(where: { $0.hasSameIdentity(as: track) }))
+
+        if isSelected {
             cell.accessoryType = .checkmark
-            tableView.selectRow(at: indexPath, animated: true, scrollPosition: .none)
+            tableView.selectRow(at: indexPath, animated: false, scrollPosition: .none)
         } else {
             cell.accessoryType = .none
+            tableView.deselectRow(at: indexPath, animated: false)
         }
         
         if tableView == myHubController.tracksTableView,

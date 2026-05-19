@@ -65,5 +65,4 @@ We may update this Privacy Policy from time to time. Material changes will be re
 
 For privacy questions or requests, contact:
 
-- Email: privacy@wej.app
-
+- Email: alisidd@icloud.com
