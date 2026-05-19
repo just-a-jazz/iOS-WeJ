@@ -390,10 +390,8 @@ extension QueueViewController {
     
     func updateTable() {
         DispatchQueue.main.async {
-            if !self.tracksTableView.isEditing {
-                self.refreshVisibleQueueSnapshot()
-                self.tracksTableView.reloadData()
-            }
+            self.refreshVisibleQueueSnapshot()
+            self.tracksTableView.reloadData()
         }
     }
     
