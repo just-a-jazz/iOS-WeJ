@@ -149,8 +149,10 @@ class MusicLibrarySelectionViewController: UIViewController, ViewControllerAcces
             button.titleLabel?.adjustsFontForContentSizeCategory = true
             button.titleLabel?.adjustsFontSizeToFitWidth = true
             button.titleLabel?.minimumScaleFactor = 0.75
-            button.contentEdgeInsets = .zero
-            button.titleEdgeInsets = UIEdgeInsets(top: 0, left: gap, bottom: 0, right: 0)
+            var configuration = button.configuration ?? .plain()
+            configuration.contentInsets = .zero
+            configuration.imagePadding = gap
+            button.configuration = configuration
         }
     }
 
