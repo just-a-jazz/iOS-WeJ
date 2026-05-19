@@ -1,11 +1,17 @@
 ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES
+CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = NO
 FRAMEWORK_SEARCH_PATHS = $(inherited) "${PODS_CONFIGURATION_BUILD_DIR}/M13Checkbox" "${PODS_CONFIGURATION_BUILD_DIR}/NVActivityIndicatorView" "${PODS_CONFIGURATION_BUILD_DIR}/RKNotificationHub" "${PODS_CONFIGURATION_BUILD_DIR}/Siren" "${PODS_CONFIGURATION_BUILD_DIR}/SwiftyJSON"
 GCC_PREPROCESSOR_DEFINITIONS = $(inherited) COCOAPODS=1
-LD_RUNPATH_SEARCH_PATHS = $(inherited) '@executable_path/Frameworks' '@loader_path/Frameworks'
-OTHER_CFLAGS = $(inherited) -iquote "${PODS_CONFIGURATION_BUILD_DIR}/M13Checkbox/M13Checkbox.framework/Headers" -iquote "${PODS_CONFIGURATION_BUILD_DIR}/NVActivityIndicatorView/NVActivityIndicatorView.framework/Headers" -iquote "${PODS_CONFIGURATION_BUILD_DIR}/RKNotificationHub/RKNotificationHub.framework/Headers" -iquote "${PODS_CONFIGURATION_BUILD_DIR}/Siren/Siren.framework/Headers" -iquote "${PODS_CONFIGURATION_BUILD_DIR}/SwiftyJSON/SwiftyJSON.framework/Headers"
-OTHER_LDFLAGS = $(inherited) -framework "M13Checkbox" -framework "NVActivityIndicatorView" -framework "RKNotificationHub" -framework "Siren" -framework "SwiftyJSON"
-OTHER_SWIFT_FLAGS = $(inherited) "-D" "COCOAPODS"
+HEADER_SEARCH_PATHS = $(inherited) "${PODS_CONFIGURATION_BUILD_DIR}/M13Checkbox/M13Checkbox.framework/Headers" "${PODS_CONFIGURATION_BUILD_DIR}/NVActivityIndicatorView/NVActivityIndicatorView.framework/Headers" "${PODS_CONFIGURATION_BUILD_DIR}/RKNotificationHub/RKNotificationHub.framework/Headers" "${PODS_CONFIGURATION_BUILD_DIR}/Siren/Siren.framework/Headers" "${PODS_CONFIGURATION_BUILD_DIR}/SwiftyJSON/SwiftyJSON.framework/Headers"
+LD_RUNPATH_SEARCH_PATHS = $(inherited) /usr/lib/swift '@executable_path/Frameworks' '@loader_path/Frameworks'
+LIBRARY_SEARCH_PATHS = $(inherited) "${TOOLCHAIN_DIR}/usr/lib/swift/${PLATFORM_NAME}" /usr/lib/swift
+OTHER_CFLAGS = $(inherited) -isystem "${PODS_CONFIGURATION_BUILD_DIR}/M13Checkbox/M13Checkbox.framework/Headers" -isystem "${PODS_CONFIGURATION_BUILD_DIR}/NVActivityIndicatorView/NVActivityIndicatorView.framework/Headers" -isystem "${PODS_CONFIGURATION_BUILD_DIR}/RKNotificationHub/RKNotificationHub.framework/Headers" -isystem "${PODS_CONFIGURATION_BUILD_DIR}/Siren/Siren.framework/Headers" -isystem "${PODS_CONFIGURATION_BUILD_DIR}/SwiftyJSON/SwiftyJSON.framework/Headers" -iframework "${PODS_CONFIGURATION_BUILD_DIR}/M13Checkbox" -iframework "${PODS_CONFIGURATION_BUILD_DIR}/NVActivityIndicatorView" -iframework "${PODS_CONFIGURATION_BUILD_DIR}/RKNotificationHub" -iframework "${PODS_CONFIGURATION_BUILD_DIR}/Siren" -iframework "${PODS_CONFIGURATION_BUILD_DIR}/SwiftyJSON"
+OTHER_LDFLAGS = $(inherited) -framework "CoreGraphics" -framework "Foundation" -framework "M13Checkbox" -framework "NVActivityIndicatorView" -framework "QuartzCore" -framework "RKNotificationHub" -framework "Siren" -framework "SwiftyJSON" -framework "UIKit"
+OTHER_MODULE_VERIFIER_FLAGS = $(inherited) "-F${PODS_CONFIGURATION_BUILD_DIR}/M13Checkbox" "-F${PODS_CONFIGURATION_BUILD_DIR}/NVActivityIndicatorView" "-F${PODS_CONFIGURATION_BUILD_DIR}/RKNotificationHub" "-F${PODS_CONFIGURATION_BUILD_DIR}/Siren" "-F${PODS_CONFIGURATION_BUILD_DIR}/SwiftyJSON"
+OTHER_SWIFT_FLAGS = $(inherited) -D COCOAPODS
 PODS_BUILD_DIR = ${BUILD_DIR}
 PODS_CONFIGURATION_BUILD_DIR = ${PODS_BUILD_DIR}/$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)
 PODS_PODFILE_DIR_PATH = ${SRCROOT}/.
 PODS_ROOT = ${SRCROOT}/Pods
+PODS_XCFRAMEWORKS_BUILD_DIR = $(PODS_CONFIGURATION_BUILD_DIR)/XCFrameworkIntermediates
+USE_RECURSIVE_SCRIPT_INPUTS_IN_SCRIPT_PHASES = YES

@@ -14,6 +14,14 @@ DEPENDENCIES:
   - Siren
   - SwiftyJSON
 
+SPEC REPOS:
+  trunk:
+    - M13Checkbox
+    - NVActivityIndicatorView
+    - RKNotificationHub
+    - Siren
+    - SwiftyJSON
+
 SPEC CHECKSUMS:
   M13Checkbox: a8c2491cfbbca10797925fd0b9154a782bf40d89
   NVActivityIndicatorView: 8068ba3ad39cb44cbaab25d89ff2546b3f092681
@@ -21,6 +29,6 @@ SPEC CHECKSUMS:
   Siren: 5b8be41b5cd05aa3528303325966e919bd53e412
   SwiftyJSON: c29297daf073d2aa016295d5809cdd68045c39b3
 
-PODFILE CHECKSUM: 240a96f458836cfe715f009ed8c5bbd265b51474
+PODFILE CHECKSUM: 22ab82d532306492771af22a17ac28af78eb5c90
 
-COCOAPODS: 1.4.0
+COCOAPODS: 1.16.2

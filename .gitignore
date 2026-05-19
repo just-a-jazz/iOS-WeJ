@@ -2,4 +2,7 @@
 PrivateConfig.swift
 certificate.cer
 build/*
-WeJ.xcworkspace/
+*.xcuserstate
+xcuserdata/
+WeJ.xcworkspace/xcuserdata/
+Pods/Pods.xcodeproj/xcuserdata/
