@@ -10,9 +10,11 @@ import UIKit
 import RKNotificationHub
 import NVActivityIndicatorView
 
-class MusicLibrarySelectionViewController: UIViewController, ViewControllerAccessDelegate, SelectionCountBadgePresenting {
+class MusicLibrarySelectionViewController: UIViewController, ViewControllerAccessDelegate, SelectionCountBadgePresenting, UIGestureRecognizerDelegate {
     
     private weak var delegate: AddTracksTabBarController!
+    private var topAreaPanGestureRecognizer: UIPanGestureRecognizer!
+    private var isTopAreaPanActive = false
 
     @IBOutlet weak var headerHeightConstraint: NSLayoutConstraint!
     @IBOutlet weak var myLibraryLabel: UILabel!
@@ -29,7 +31,15 @@ class MusicLibrarySelectionViewController: UIViewController, ViewControllerAcces
     @IBOutlet weak var appleMusicLibraryButton: UIButton!
 
     private var libraryMusicService: MusicService!
+    private enum LibraryDestination {
+        case albums
+        case artists
+        case playlists
+        case allSongs
+    }
+
     private var authorizationManager: AuthorizationManager!
+    private var libraryDestination: LibraryDestination?
     private var isLoadingMostPlayed = false
     private var hasMoreMostPlayed = true
     private var mostPlayedOffset = 0
@@ -81,21 +91,26 @@ class MusicLibrarySelectionViewController: UIViewController, ViewControllerAcces
         super.viewWillAppear(animated)
         setBadge(to: totalTracksCount)
     }
+
     
     private func hideNavigationBar() {
         navigationController?.navigationBar.isHidden = true
     }
     
     private func initializeVariables() {
-        SpotifyAuthorizationManager.storyboardSegue = "Show Spotify Library"
         AppleMusicAuthorizationManager.storyboardSegue = "Show Apple Music Library"
+        libraryMusicService = .appleMusic
         configureMostPlayedConstraints()
     }
+
     
     private func setDelegates() {
         delegate = (navigationController?.tabBarController! as! AddTracksTabBarController)
-        
-        SpotifyAuthorizationManager.delegate = self
+
+        topAreaPanGestureRecognizer = UIPanGestureRecognizer(target: self, action: #selector(handleTopAreaPanGesture(_:)))
+        topAreaPanGestureRecognizer.delegate = self
+        view.addGestureRecognizer(topAreaPanGestureRecognizer)
+
         AppleMusicAuthorizationManager.delegate = self
         tracksTableView.delegate = delegate
         tracksTableView.dataSource = delegate
@@ -104,6 +119,80 @@ class MusicLibrarySelectionViewController: UIViewController, ViewControllerAcces
     private func adjustViews() {
         tracksTableView.contentInset = UIEdgeInsets(top: 0, left: 0, bottom: 50, right: 0)
         tracksTableView.backgroundColor = .clear
+        configureLibraryButtons()
+    }
+
+    private func configureLibraryButtons() {
+        let buttons = [spotifyLibraryButton, appleMusicLibraryButton] + libraryButtonsFromStackView()
+        let iconNames = ["albumsIcon", "artistsIcon", "playlistsIcon", "allSongsIcon"]
+        let highlightedIconNames = ["albumsIconHighlighted", "artistsIconHighlighted", "playlistsIconHighlighted", "allSongsIconHighlighted"]
+
+        let scale: CGFloat = 0.9
+        let normalIcons = iconNames.compactMap { UIImage(named: $0) }
+        let maxIconWidth = (normalIcons.map { $0.size.width }.max() ?? 0) * scale
+        let gap: CGFloat = 12
+
+        for (index, button) in buttons.enumerated() where index < iconNames.count {
+            guard let button else { continue }
+            let normalIcon = paddedIcon(named: iconNames[index], toWidth: maxIconWidth, scale: scale)
+            let highlightedIcon = paddedIcon(named: highlightedIconNames[index], toWidth: maxIconWidth, scale: scale)
+
+            button.setImage(normalIcon, for: .normal)
+            button.setImage(highlightedIcon, for: .highlighted)
+            button.contentHorizontalAlignment = .left
+            button.semanticContentAttribute = .forceLeftToRight
+            button.tintColor = .white
+            if let font = button.titleLabel?.font {
+                button.titleLabel?.font = font.withSize(font.pointSize * scale)
+            }
+            button.titleLabel?.lineBreakMode = .byClipping
+            button.titleLabel?.adjustsFontForContentSizeCategory = true
+            button.titleLabel?.adjustsFontSizeToFitWidth = true
+            button.titleLabel?.minimumScaleFactor = 0.75
+            button.contentEdgeInsets = .zero
+            button.titleEdgeInsets = UIEdgeInsets(top: 0, left: gap, bottom: 0, right: 0)
+        }
+    }
+
+    private func paddedIcon(named name: String, toWidth width: CGFloat, scale: CGFloat) -> UIImage? {
+        guard let image = UIImage(named: name) else { return nil }
+        let scaledSize = CGSize(width: image.size.width * scale, height: image.size.height * scale)
+        let paddedSize = CGSize(width: width, height: scaledSize.height)
+
+        UIGraphicsBeginImageContextWithOptions(paddedSize, false, image.scale)
+        image.draw(in: CGRect(origin: .zero, size: scaledSize))
+        let paddedImage = UIGraphicsGetImageFromCurrentImageContext()
+        UIGraphicsEndImageContext()
+        return paddedImage
+    }
+
+    private func libraryButtonsFromStackView() -> [UIButton] {
+        guard let stackView = spotifyLibraryButton.superview as? UIStackView else { return [] }
+        return stackView.arrangedSubviews.compactMap { $0 as? UIButton }.filter { $0 != spotifyLibraryButton && $0 != appleMusicLibraryButton }
+    }
+
+    @objc private func handleTopAreaPanGesture(_ gestureRecognizer: UIPanGestureRecognizer) {
+        switch gestureRecognizer.state {
+        case .began:
+            isTopAreaPanActive = true
+            delegate.beginManualHeaderAdjustment()
+        case .changed:
+            guard isTopAreaPanActive else { return }
+            let translationY = gestureRecognizer.translation(in: view).y
+            delegate.updateManualHeaderAdjustment(translationY: translationY)
+        case .ended, .cancelled, .failed:
+            guard isTopAreaPanActive else { return }
+            isTopAreaPanActive = false
+            delegate.endManualHeaderAdjustment()
+        default:
+            break
+        }
+    }
+
+    func gestureRecognizerShouldBegin(_ gestureRecognizer: UIGestureRecognizer) -> Bool {
+        guard gestureRecognizer === topAreaPanGestureRecognizer else { return true }
+        let location = gestureRecognizer.location(in: view)
+        return location.y < tracksTableView.frame.minY
     }
 
     private var mostPlayedTopConstraint: NSLayoutConstraint?
@@ -193,49 +282,68 @@ class MusicLibrarySelectionViewController: UIViewController, ViewControllerAcces
         }
     }
 
-    // MARK: - Navigation 
-    
-    @IBAction func showSpotifyLibrary() {
-        guard !processingLogin else { return }
-        authorizationManager = SpotifyAuthorizationManager.shared
-        libraryMusicService = .spotify
-        authorizationManager.requestAuthorization()
+    // MARK: - Navigation
+
+    @IBAction func showLibraryAlbums() {
+        requestLibraryAuthorization(for: .albums)
     }
-    
-    @IBAction func showAppleMusicLibrary() {
+
+    @IBAction func showLibraryArtists() {
+        requestLibraryAuthorization(for: .artists)
+    }
+
+    @IBAction func showLibraryPlaylists() {
+        requestLibraryAuthorization(for: .playlists)
+    }
+
+    @IBAction func showLibraryAllSongs() {
+        requestLibraryAuthorization(for: .allSongs)
+    }
+
+    private func requestLibraryAuthorization(for destination: LibraryDestination) {
         guard !processingLogin else { return }
+        libraryDestination = destination
         authorizationManager = AppleMusicAuthorizationManager()
         libraryMusicService = .appleMusic
         authorizationManager.requestAuthorization()
     }
-    
+
     func tryAgain() {
-        if libraryMusicService == .spotify {
-            showSpotifyLibrary()
-        } else {
-            showAppleMusicLibrary()
+        if let destination = libraryDestination {
+            requestLibraryAuthorization(for: destination)
         }
     }
-    
+
     func completeAuthorization(withSegueIdentifier identifier: String) {
-        guard identifier == "Show Spotify Library" || identifier == "Show Apple Music Library" else {
-            performSegue(withIdentifier: identifier, sender: nil)
-            return
+        guard identifier == "Show Apple Music Library" else { return }
+
+        switch libraryDestination {
+        case .albums:
+            showLibrarySubcategory(.albums)
+        case .artists:
+            showLibrarySubcategory(.artists)
+        case .playlists:
+            showLibrarySubcategory(.playlists)
+        case .allSongs:
+            showAllSongs()
+        case .none:
+            break
         }
-        
-        guard let controller = storyboard?.instantiateViewController(withIdentifier: "PlaylistSelection") as? PlaylistSelectionViewController else {
-            performSegue(withIdentifier: identifier, sender: nil)
-            return
-        }
-        
-        controller.musicService = libraryMusicService
+    }
+
+    private func showLibrarySubcategory(_ playlistType: PlaylistType) {
+        guard let controller = storyboard?.instantiateViewController(withIdentifier: "57W-ks-AM8") as? PlaylistSubcategorySelectionViewController else { return }
+        controller.musicService = .appleMusic
+        controller.playlistType = playlistType
         navigationController?.pushViewController(controller, animated: true)
     }
 
-    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
-        if let controller = segue.destination as? PlaylistSelectionViewController {
-            controller.musicService = libraryMusicService
-        }
+    private func showAllSongs() {
+        guard let controller = storyboard?.instantiateViewController(withIdentifier: "9L9-Hk-w7d") as? LibraryTracksViewController else { return }
+        controller.musicService = .appleMusic
+        controller.playlistType = .all
+        controller.playlistName = NSLocalizedString("All Songs", comment: "")
+        navigationController?.pushViewController(controller, animated: true)
     }
     
 }

@@ -59,7 +59,7 @@ class PartyCreationViewController: UIViewController, UITextFieldDelegate, ViewCo
         setDelegates()
         
         setPartyName()
-//        disableSpotifyButton()
+        disableSpotifyButton()
         setMusicService()
     }
     

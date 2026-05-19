@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="23727" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="lXt-Y2-qAY">
-    <device id="retina5_9" orientation="portrait" appearance="light"/>
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="24765" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="lXt-Y2-qAY">
+    <device id="retina5_9" orientation="portrait" appearance="dark"/>
     <dependencies>
         <deployment identifier="iOS"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="23721"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="24743"/>
         <capability name="Safe area layout guides" minToolsVersion="9.0"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
@@ -98,7 +98,7 @@
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
                             <tableView clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="plain" separatorStyle="none" rowHeight="90" sectionHeaderHeight="28" sectionFooterHeight="28" translatesAutoresizingMaskIntoConstraints="NO" id="gji-Vm-3Q6">
-                                <rect key="frame" x="0.0" y="237.66666666666666" width="375" height="506.33333333333337"/>
+                                <rect key="frame" x="0.0" y="247.66666666666666" width="375" height="496.33333333333337"/>
                                 <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="calibratedWhite"/>
                                 <prototypes>
                                     <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" selectionStyle="none" indentationWidth="10" reuseIdentifier="Party Cell" rowHeight="90" id="YPX-U5-zAS" customClass="OptionTableViewCell" customModule="WeJ">
@@ -138,7 +138,7 @@
                                 </prototypes>
                             </tableView>
                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Parties" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="9SB-TC-3b7">
-                                <rect key="frame" x="156.66666666666666" y="160.33333333333334" width="62" height="27.333333333333343"/>
+                                <rect key="frame" x="156.66666666666666" y="170.33333333333334" width="62" height="27.333333333333343"/>
                                 <fontDescription key="fontDescription" name="AvenirNext-DemiBold" family="Avenir Next" pointSize="20"/>
                                 <color key="textColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                                 <nil key="highlightedColor"/>
@@ -155,7 +155,7 @@
                                 </userDefinedRuntimeAttributes>
                             </view>
                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="IoS-eQ-gID" userLabel="Back Button">
-                                <rect key="frame" x="12" y="164" width="10" height="20"/>
+                                <rect key="frame" x="12" y="174" width="10" height="20"/>
                                 <viewLayoutGuide key="safeArea" id="rEK-zK-792"/>
                                 <constraints>
                                     <constraint firstAttribute="height" constant="20" id="7T9-8I-ABi"/>
@@ -447,7 +447,7 @@
                                 </prototypes>
                             </tableView>
                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="YGx-cb-qhQ">
-                                <rect key="frame" x="315" y="66" width="30" height="30"/>
+                                <rect key="frame" x="325" y="66" width="30" height="30"/>
                                 <constraints>
                                     <constraint firstAttribute="width" constant="30" id="86B-N1-X7l"/>
                                     <constraint firstAttribute="height" constant="30" id="9Rw-P0-OEh"/>
@@ -464,7 +464,7 @@
                                 </connections>
                             </button>
                             <button hidden="YES" opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="vDq-NB-ESS">
-                                <rect key="frame" x="315" y="64" width="30" height="34"/>
+                                <rect key="frame" x="325" y="64" width="30" height="34"/>
                                 <fontDescription key="fontDescription" name="AvenirNext-Regular" family="Avenir Next" pointSize="16"/>
                                 <state key="normal" title="Edit">
                                     <color key="titleColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
@@ -593,7 +593,7 @@
                                 <rect key="frame" x="16" y="55" width="343" height="40"/>
                                 <subviews>
                                     <textField opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" placeholder="Search" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="9uC-0w-dVM" customClass="searchTextField" customModule="WeJ" customModuleProvider="target">
-                                        <rect key="frame" x="0.0" y="0.0" width="277" height="40"/>
+                                        <rect key="frame" x="0.0" y="0.0" width="262" height="40"/>
                                         <color key="textColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                                         <fontDescription key="fontDescription" name="AvenirNext-Regular" family="Avenir Next" pointSize="20"/>
                                         <textInputTraits key="textInputTraits" keyboardAppearance="alert" returnKeyType="search"/>
@@ -737,10 +737,10 @@
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
                             <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="dra-Dx-rzb" userLabel="Background">
-                                <rect key="frame" x="0.0" y="0.0" width="375" height="280"/>
+                                <rect key="frame" x="0.0" y="0.0" width="375" height="390"/>
                                 <subviews>
                                     <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="zEq-0A-asW" customClass="NVActivityIndicatorView" customModule="NVActivityIndicatorView">
-                                        <rect key="frame" x="108" y="144.66666666666666" width="20" height="20"/>
+                                        <rect key="frame" x="364" y="138.66666666666666" width="20" height="20"/>
                                         <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                                         <constraints>
                                             <constraint firstAttribute="height" constant="20" id="Dex-99-aXO"/>
@@ -755,51 +755,77 @@
                                 <color key="backgroundColor" red="0.078431372549019607" green="0.077265150845050812" blue="0.077263571321964264" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                             </view>
                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="My Library" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="ROQ-P2-Gnm">
-                                <rect key="frame" x="31.000000000000007" y="68.666666666666671" width="97.666666666666686" height="27.333333333333329"/>
+                                <rect key="frame" x="31.000000000000007" y="47.666666666666664" width="97.666666666666686" height="27.333333333333336"/>
                                 <fontDescription key="fontDescription" name="AvenirNext-DemiBold" family="Avenir Next" pointSize="20"/>
                                 <color key="textColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                                 <nil key="highlightedColor"/>
                             </label>
-                            <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" alignment="top" spacing="30" translatesAutoresizingMaskIntoConstraints="NO" id="o5s-ib-EJ8">
-                                <rect key="frame" x="31" y="136" width="103" height="104"/>
+                            <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" spacing="29" translatesAutoresizingMaskIntoConstraints="NO" id="o5s-ib-EJ8">
+                                <rect key="frame" x="31" y="130" width="313" height="220"/>
                                 <subviews>
-                                    <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="vbM-dn-S6c">
-                                        <rect key="frame" x="0.0" y="0.0" width="57" height="37"/>
+                                    <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="vbM-dn-S6c">
+                                        <rect key="frame" x="0.0" y="0.0" width="313" height="37"/>
                                         <fontDescription key="fontDescription" name="AvenirNext-Regular" family="Avenir Next" pointSize="18"/>
-                                        <state key="normal" title="Spotify">
+                                        <state key="normal" title="Albums">
                                             <color key="titleColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                                         </state>
                                         <state key="highlighted">
                                             <color key="titleColor" red="0.96470588239999999" green="0.65098039220000004" blue="0.13725490200000001" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                         </state>
                                         <connections>
-                                            <action selector="showSpotifyLibrary" destination="qyB-hT-f05" eventType="touchUpInside" id="ETH-Qe-UvX"/>
+                                            <action selector="showLibraryAlbums" destination="qyB-hT-f05" eventType="touchUpInside" id="ETH-Qe-UvX"/>
                                         </connections>
                                     </button>
-                                    <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="oQ0-NS-djS">
-                                        <rect key="frame" x="0.0" y="67" width="103" height="37"/>
+                                    <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="oQ0-NS-djS">
+                                        <rect key="frame" x="0.0" y="61" width="313" height="37"/>
                                         <fontDescription key="fontDescription" name="AvenirNext-Regular" family="Avenir Next" pointSize="18"/>
-                                        <state key="normal" title="Apple Music">
+                                        <state key="normal" title="Artists">
                                             <color key="titleColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                                         </state>
                                         <state key="highlighted">
                                             <color key="titleColor" red="0.96470588239999999" green="0.65098039220000004" blue="0.13725490200000001" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                         </state>
                                         <connections>
-                                            <action selector="showAppleMusicLibrary" destination="qyB-hT-f05" eventType="touchUpInside" id="dYr-2o-H4M"/>
+                                            <action selector="showLibraryArtists" destination="qyB-hT-f05" eventType="touchUpInside" id="dYr-2o-H4M"/>
+                                        </connections>
+                                    </button>
+                                    <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="rN8-5W-d9L">
+                                        <rect key="frame" x="0.0" y="122" width="313" height="37"/>
+                                        <fontDescription key="fontDescription" name="AvenirNext-Regular" family="Avenir Next" pointSize="18"/>
+                                        <state key="normal" title="Playlists">
+                                            <color key="titleColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                                        </state>
+                                        <state key="highlighted">
+                                            <color key="titleColor" red="0.96470588239999999" green="0.65098039220000004" blue="0.13725490200000001" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                                        </state>
+                                        <connections>
+                                            <action selector="showLibraryPlaylists" destination="qyB-hT-f05" eventType="touchUpInside" id="Qfj-yN-9C2"/>
+                                        </connections>
+                                    </button>
+                                    <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="eQ4-tL-4hU">
+                                        <rect key="frame" x="0.0" y="183" width="313" height="37"/>
+                                        <fontDescription key="fontDescription" name="AvenirNext-Regular" family="Avenir Next" pointSize="18"/>
+                                        <state key="normal" title="All Songs">
+                                            <color key="titleColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                                        </state>
+                                        <state key="highlighted">
+                                            <color key="titleColor" red="0.96470588239999999" green="0.65098039220000004" blue="0.13725490200000001" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                                        </state>
+                                        <connections>
+                                            <action selector="showLibraryAllSongs" destination="qyB-hT-f05" eventType="touchUpInside" id="9ve-V2-2C3"/>
                                         </connections>
                                     </button>
                                 </subviews>
                             </stackView>
                             <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="zWm-qK-ibE" userLabel="Separator">
-                                <rect key="frame" x="0.0" y="280" width="375" height="1"/>
+                                <rect key="frame" x="0.0" y="390" width="375" height="1"/>
                                 <color key="backgroundColor" red="0.25490196078431371" green="0.25490196078431371" blue="0.25490196078431371" alpha="1" colorSpace="calibratedRGB"/>
                                 <constraints>
                                     <constraint firstAttribute="height" constant="1" id="M3p-uH-gcC"/>
                                 </constraints>
                             </view>
                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="O56-Fc-hiM">
-                                <rect key="frame" x="31" y="331" width="115" height="40"/>
+                                <rect key="frame" x="31" y="441" width="115" height="40"/>
                                 <fontDescription key="fontDescription" name="AvenirNext-DemiBold" family="Avenir Next" pointSize="20"/>
                                 <state key="normal" title="Most Played"/>
                                 <state key="highlighted">
@@ -807,7 +833,7 @@
                                 </state>
                             </button>
                             <tableView clipsSubviews="YES" contentMode="scaleToFill" ambiguous="YES" alwaysBounceVertical="YES" dataMode="prototypes" style="plain" separatorStyle="none" allowsMultipleSelection="YES" rowHeight="100" sectionHeaderHeight="28" sectionFooterHeight="28" translatesAutoresizingMaskIntoConstraints="NO" id="f0I-Jr-3mj">
-                                <rect key="frame" x="0.0" y="411.5" width="375" height="255.5"/>
+                                <rect key="frame" x="0.0" y="521.5" width="375" height="255.5"/>
                                 <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="calibratedWhite"/>
                                 <prototypes>
                                     <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" selectionStyle="none" indentationWidth="10" reuseIdentifier="Track" rowHeight="100" id="pQo-8q-Upk" customClass="TrackTableViewCell" customModule="WeJ" customModuleProvider="target">
@@ -860,7 +886,7 @@
                                 </prototypes>
                             </tableView>
                             <view userInteractionEnabled="NO" contentMode="scaleToFill" ambiguous="YES" translatesAutoresizingMaskIntoConstraints="NO" id="en6-js-q8j" customClass="NVActivityIndicatorView" customModule="NVActivityIndicatorView">
-                                <rect key="frame" x="167.66666666666666" y="479.5" width="40" height="40"/>
+                                <rect key="frame" x="167.66666666666666" y="589.5" width="40" height="40"/>
                                 <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                                 <constraints>
                                     <constraint firstAttribute="width" constant="40" id="78r-bc-yDg"/>
@@ -871,7 +897,7 @@
                                 </userDefinedRuntimeAttributes>
                             </view>
                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="Oaq-Ne-1hT" userLabel="Done Button">
-                                <rect key="frame" x="313" y="99" width="46" height="40"/>
+                                <rect key="frame" x="313" y="109" width="46" height="40"/>
                                 <viewLayoutGuide key="safeArea" id="b7e-cb-cRr"/>
                                 <constraints>
                                     <constraint firstAttribute="height" constant="40" id="GOC-Ko-83H"/>
@@ -907,8 +933,9 @@
                             <constraint firstItem="dra-Dx-rzb" firstAttribute="leading" secondItem="zWm-qK-ibE" secondAttribute="leading" id="ejN-OF-3sM"/>
                             <constraint firstItem="vYC-gR-c5m" firstAttribute="trailing" secondItem="f0I-Jr-3mj" secondAttribute="trailing" id="eqe-bZ-8gj"/>
                             <constraint firstItem="o5s-ib-EJ8" firstAttribute="top" secondItem="ROQ-P2-Gnm" secondAttribute="bottom" constant="40" id="fGS-Nc-WFG"/>
+                            <constraint firstItem="vYC-gR-c5m" firstAttribute="trailing" secondItem="o5s-ib-EJ8" secondAttribute="trailing" constant="31" id="n8W-5v-DY4"/>
                             <constraint firstItem="zWm-qK-ibE" firstAttribute="leading" secondItem="vYC-gR-c5m" secondAttribute="leading" id="otR-EB-wuQ"/>
-                            <constraint firstItem="zWm-qK-ibE" firstAttribute="top" secondItem="PcW-zK-Yha" secondAttribute="top" constant="280" id="pcc-pA-29o"/>
+                            <constraint firstItem="zWm-qK-ibE" firstAttribute="top" secondItem="PcW-zK-Yha" secondAttribute="top" constant="390" id="pcc-pA-29o"/>
                             <constraint firstItem="zWm-qK-ibE" firstAttribute="top" secondItem="o5s-ib-EJ8" secondAttribute="bottom" constant="40" id="pfG-M8-B7p"/>
                             <constraint firstItem="f0I-Jr-3mj" firstAttribute="top" secondItem="O56-Fc-hiM" secondAttribute="bottom" constant="25" id="u24-XG-7Of"/>
                             <constraint firstItem="zEq-0A-asW" firstAttribute="leading" secondItem="vbM-dn-S6c" secondAttribute="trailing" constant="20" id="uOc-IU-SIV"/>
@@ -943,7 +970,7 @@
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="mgp-if-uMx" userLabel="Back Button">
-                                <rect key="frame" x="12" y="109" width="10" height="20"/>
+                                <rect key="frame" x="12" y="119" width="10" height="20"/>
                                 <constraints>
                                     <constraint firstAttribute="width" constant="10" id="FrD-Go-rEj"/>
                                     <constraint firstAttribute="height" constant="20" id="kBz-Fa-6yB"/>
@@ -955,7 +982,7 @@
                                 </connections>
                             </button>
                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Music Service Label" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="rEW-ce-a3I">
-                                <rect key="frame" x="96.666666666666686" y="105.33333333333333" width="182" height="27.333333333333329"/>
+                                <rect key="frame" x="96.666666666666686" y="115.33333333333333" width="182" height="27.333333333333329"/>
                                 <fontDescription key="fontDescription" name="AvenirNext-DemiBold" family="Avenir Next" pointSize="20"/>
                                 <color key="textColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                                 <nil key="highlightedColor"/>
@@ -1071,7 +1098,7 @@
                                 </constraints>
                             </stackView>
                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="I4Z-vj-X9q">
-                                <rect key="frame" x="313" y="99" width="46" height="40"/>
+                                <rect key="frame" x="313" y="109" width="46" height="40"/>
                                 <viewLayoutGuide key="safeArea" id="i0C-vF-3fC"/>
                                 <constraints>
                                     <constraint firstAttribute="height" constant="40" id="Wer-Xc-w7z"/>
@@ -1121,13 +1148,13 @@
         <!--Playlist Subcategory Selection View Controller-->
         <scene sceneID="K25-19-OUy">
             <objects>
-                <viewController id="57W-ks-AM8" customClass="PlaylistSubcategorySelectionViewController" customModule="WeJ" customModuleProvider="target" sceneMemberID="viewController">
+                <viewController storyboardIdentifier="57W-ks-AM8" id="57W-ks-AM8" customClass="PlaylistSubcategorySelectionViewController" customModule="WeJ" customModuleProvider="target" sceneMemberID="viewController">
                     <view key="view" contentMode="scaleToFill" id="KGl-2B-IAV">
                         <rect key="frame" x="0.0" y="0.0" width="375" height="329"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
                             <tableView clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="plain" separatorStyle="none" rowHeight="80" sectionHeaderHeight="48" sectionFooterHeight="28" translatesAutoresizingMaskIntoConstraints="NO" id="1Pr-tD-dYo">
-                                <rect key="frame" x="0.0" y="140.66666666666663" width="375" height="139.33333333333337"/>
+                                <rect key="frame" x="0.0" y="150.66666666666666" width="375" height="95.333333333333343"/>
                                 <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="calibratedWhite"/>
                                 <color key="sectionIndexColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                                 <prototypes>
@@ -1196,7 +1223,7 @@
                                 </prototypes>
                             </tableView>
                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="C3U-F8-Jhj" userLabel="Back Button">
-                                <rect key="frame" x="12" y="109" width="10" height="20"/>
+                                <rect key="frame" x="12" y="119" width="10" height="20"/>
                                 <constraints>
                                     <constraint firstAttribute="width" constant="10" id="ZTS-Ej-K87"/>
                                     <constraint firstAttribute="height" constant="20" id="gUp-54-r0a"/>
@@ -1208,13 +1235,13 @@
                                 </connections>
                             </button>
                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Playlist Type" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="bFk-nd-pgR">
-                                <rect key="frame" x="130.66666666666666" y="105.33333333333333" width="114" height="27.333333333333329"/>
+                                <rect key="frame" x="130.66666666666666" y="115.33333333333333" width="114" height="27.333333333333329"/>
                                 <fontDescription key="fontDescription" name="AvenirNext-DemiBold" family="Avenir Next" pointSize="20"/>
                                 <color key="textColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                                 <nil key="highlightedColor"/>
                             </label>
                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="Ksa-af-Jhb">
-                                <rect key="frame" x="313" y="99" width="46" height="40"/>
+                                <rect key="frame" x="313" y="109" width="46" height="40"/>
                                 <viewLayoutGuide key="safeArea" id="5Gf-ED-93S"/>
                                 <constraints>
                                     <constraint firstAttribute="height" constant="40" id="P2O-BX-A9A"/>
@@ -1259,19 +1286,19 @@
         <!--Library Tracks View Controller-->
         <scene sceneID="brg-Fo-EvC">
             <objects>
-                <viewController id="9L9-Hk-w7d" customClass="LibraryTracksViewController" customModule="WeJ" customModuleProvider="target" sceneMemberID="viewController">
+                <viewController storyboardIdentifier="9L9-Hk-w7d" id="9L9-Hk-w7d" customClass="LibraryTracksViewController" customModule="WeJ" customModuleProvider="target" sceneMemberID="viewController">
                     <view key="view" contentMode="scaleToFill" id="6vU-b5-sH9">
                         <rect key="frame" x="0.0" y="0.0" width="375" height="329"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="All Songs" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="xfl-Zr-TyQ">
-                                <rect key="frame" x="144" y="105.33333333333333" width="87" height="27.333333333333329"/>
+                                <rect key="frame" x="144" y="115.33333333333333" width="87" height="27.333333333333329"/>
                                 <fontDescription key="fontDescription" name="AvenirNext-DemiBold" family="Avenir Next" pointSize="20"/>
                                 <color key="textColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                                 <nil key="highlightedColor"/>
                             </label>
                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="PVJ-Qj-whM" userLabel="Back Button">
-                                <rect key="frame" x="12" y="109" width="10" height="20"/>
+                                <rect key="frame" x="12" y="119" width="10" height="20"/>
                                 <constraints>
                                     <constraint firstAttribute="width" constant="10" id="bZn-zs-vLc"/>
                                     <constraint firstAttribute="height" constant="20" id="uWz-as-JZb"/>
@@ -1294,7 +1321,7 @@
                                 </userDefinedRuntimeAttributes>
                             </view>
                             <tableView clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="plain" separatorStyle="none" allowsMultipleSelection="YES" rowHeight="100" sectionHeaderHeight="28" sectionFooterHeight="28" translatesAutoresizingMaskIntoConstraints="NO" id="Uej-dK-9Jz">
-                                <rect key="frame" x="0.0" y="147" width="375" height="182"/>
+                                <rect key="frame" x="0.0" y="157" width="375" height="172"/>
                                 <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="calibratedWhite"/>
                                 <prototypes>
                                     <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" selectionStyle="none" indentationWidth="10" reuseIdentifier="Track" rowHeight="100" id="ryi-pU-ycX" customClass="TrackTableViewCell" customModule="WeJ" customModuleProvider="target">
@@ -1347,7 +1374,7 @@
                                 </prototypes>
                             </tableView>
                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="oTk-WA-IIJ">
-                                <rect key="frame" x="313" y="99" width="46" height="40"/>
+                                <rect key="frame" x="313" y="109" width="46" height="40"/>
                                 <viewLayoutGuide key="safeArea" id="Yth-Gz-Hue"/>
                                 <constraints>
                                     <constraint firstAttribute="height" constant="40" id="SG4-kK-jQK"/>
@@ -1424,7 +1451,7 @@
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="qxC-at-HL1" userLabel="Back Button">
-                                <rect key="frame" x="12" y="164" width="10" height="20"/>
+                                <rect key="frame" x="12" y="174" width="10" height="20"/>
                                 <viewLayoutGuide key="safeArea" id="hdJ-Pt-C5v"/>
                                 <constraints>
                                     <constraint firstAttribute="height" constant="20" id="htI-Ps-AiJ"/>
@@ -1437,16 +1464,16 @@
                                 </connections>
                             </button>
                             <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" spacing="100" translatesAutoresizingMaskIntoConstraints="NO" id="TeZ-fU-S1F" userLabel="Personalization Stack View">
-                                <rect key="frame" x="47" y="226.33333333333331" width="281" height="199.33333333333331"/>
+                                <rect key="frame" x="47" y="227" width="281" height="198"/>
                                 <subviews>
                                     <textField opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" textAlignment="center" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="7I9-Zc-mKy" customClass="partyNameTextField" customModule="WeJ" customModuleProvider="target">
-                                        <rect key="frame" x="0.0" y="0.0" width="281" height="41.333333333333336"/>
+                                        <rect key="frame" x="0.0" y="0.0" width="281" height="40"/>
                                         <color key="textColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                                         <fontDescription key="fontDescription" name="AvenirNext-Regular" family="Avenir Next" pointSize="23"/>
                                         <textInputTraits key="textInputTraits" keyboardAppearance="alert"/>
                                     </textField>
                                     <stackView opaque="NO" contentMode="scaleToFill" distribution="fillProportionally" spacing="10" translatesAutoresizingMaskIntoConstraints="NO" id="IDK-wT-eP1" userLabel="Music Service Stack View">
-                                        <rect key="frame" x="0.0" y="141.33333333333334" width="281" height="58"/>
+                                        <rect key="frame" x="0.0" y="140" width="281" height="58"/>
                                         <subviews>
                                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="rLG-hj-JGO">
                                                 <rect key="frame" x="0.0" y="0.0" width="120.66666666666667" height="58"/>
@@ -1562,7 +1589,7 @@
             <objects>
                 <navigationController id="lXt-Y2-qAY" sceneMemberID="viewController">
                     <navigationBar key="navigationBar" contentMode="scaleToFill" id="Mvi-ay-qDE">
-                        <rect key="frame" x="0.0" y="100" width="375" height="44"/>
+                        <rect key="frame" x="0.0" y="100" width="375" height="54"/>
                         <autoresizingMask key="autoresizingMask"/>
                         <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="calibratedWhite"/>
                         <color key="tintColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
@@ -1584,7 +1611,7 @@
                     </tabBarItem>
                     <toolbarItems/>
                     <navigationBar key="navigationBar" contentMode="scaleToFill" id="VO5-6g-ecg">
-                        <rect key="frame" x="0.0" y="50" width="375" height="44"/>
+                        <rect key="frame" x="0.0" y="50" width="375" height="54"/>
                         <autoresizingMask key="autoresizingMask"/>
                         <viewLayoutGuide key="safeArea" id="okf-dk-2ai"/>
                         <color key="tintColor" white="1" alpha="1" colorSpace="calibratedWhite"/>

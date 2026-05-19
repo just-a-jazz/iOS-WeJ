@@ -13,8 +13,8 @@ class AddTracksTabBarController: UITabBarController, UITabBarControllerDelegate,
     
     var myHubController: MusicLibrarySelectionViewController!
     
-    fileprivate let minHeight: CGFloat = 280
-    fileprivate var maxHeight: CGFloat {
+    fileprivate var expandedLibraryHeaderHeight: CGFloat = 280
+    fileprivate var collapsedLibraryHeaderHeight: CGFloat {
         let safeAreaTop = view.window?.safeAreaInsets.top ?? view.safeAreaInsets.top
         let baseOffset: CGFloat = safeAreaTop >= 40 ? 70 : 45
         return safeAreaTop - baseOffset
@@ -22,6 +22,7 @@ class AddTracksTabBarController: UITabBarController, UITabBarControllerDelegate,
     
     fileprivate var previousScrollOffset: CGFloat = 0
     fileprivate var isAdjustingLibraryHeaderDuringCurrentDrag = false
+    private var manualHeaderStartHeight: CGFloat = 0
     
     var libraryTracksSelected = [Track]() {
         didSet {
@@ -130,6 +131,10 @@ class AddTracksTabBarController: UITabBarController, UITabBarControllerDelegate,
     private func initializeVariables() {
         if let navigationVC = viewControllers?.first(where: { $0 is UINavigationController }) as? UINavigationController {
             myHubController = navigationVC.viewControllers.first(where: { $0 is MusicLibrarySelectionViewController }) as? MusicLibrarySelectionViewController
+            myHubController?.loadViewIfNeeded()
+            if let headerHeight = myHubController?.headerHeightConstraint?.constant {
+                expandedLibraryHeaderHeight = headerHeight
+            }
         }
     }
     
@@ -572,6 +577,23 @@ private final class AddTracksDismissalAnimator: NSObject, UIViewControllerAnimat
 }
 
 extension AddTracksTabBarController {
+
+    func beginManualHeaderAdjustment() {
+        manualHeaderStartHeight = myHubController.headerHeightConstraint.constant
+    }
+
+    func updateManualHeaderAdjustment(translationY: CGFloat) {
+        let newHeight = min(expandedLibraryHeaderHeight,
+                            max(collapsedLibraryHeaderHeight, manualHeaderStartHeight + translationY))
+        if newHeight != myHubController.headerHeightConstraint.constant {
+            myHubController.headerHeightConstraint.constant = newHeight
+            myHubController.view.layoutIfNeeded()
+        }
+    }
+
+    func endManualHeaderAdjustment() {
+        scrollViewDidStopScrolling()
+    }
     
     // Code taken from https://michiganlabs.com/ios/development/2016/05/31/ios-animating-uitableview-header/
     func scrollViewDidScroll(_ scrollView: UIScrollView) {
@@ -579,7 +601,7 @@ extension AddTracksTabBarController {
         
         let scrollDiff = scrollView.contentOffset.y - previousScrollOffset
         
-        let absoluteTop: CGFloat = 0
+        let absoluteTop = -scrollView.adjustedContentInset.top
         
         let isScrollingDown = scrollDiff > 0 && scrollView.contentOffset.y > absoluteTop
         let isPullingDown = scrollView.panGestureRecognizer.velocity(in: scrollView).y > 0
@@ -590,7 +612,7 @@ extension AddTracksTabBarController {
         var newHeight = myHubController.headerHeightConstraint.constant
         
         if isScrollingDown {
-            newHeight = max(maxHeight, myHubController.headerHeightConstraint.constant - abs(scrollDiff))
+            newHeight = max(collapsedLibraryHeaderHeight, myHubController.headerHeightConstraint.constant - abs(scrollDiff))
             if newHeight != myHubController.headerHeightConstraint.constant {
                 isAdjustingLibraryHeaderDuringCurrentDrag = true
                 myHubController.headerHeightConstraint.constant = newHeight
@@ -598,7 +620,7 @@ extension AddTracksTabBarController {
             }
             
         } else if isScrollingUp {
-            newHeight = min(minHeight, myHubController.headerHeightConstraint.constant + abs(scrollDiff))
+            newHeight = min(expandedLibraryHeaderHeight, myHubController.headerHeightConstraint.constant + abs(scrollDiff))
             if newHeight != myHubController.headerHeightConstraint.constant {
                 isAdjustingLibraryHeaderDuringCurrentDrag = true
                 myHubController.headerHeightConstraint.constant = newHeight
@@ -636,19 +658,19 @@ extension AddTracksTabBarController {
     }
     
     func scrollViewDidStopScrolling() {
-        let range = maxHeight - minHeight
-        let midPoint = minHeight + (range / 2)
+        let range = collapsedLibraryHeaderHeight - expandedLibraryHeaderHeight
+        let midPoint = expandedLibraryHeaderHeight + (range / 2)
         
         
         myHubController.view.layoutIfNeeded()
         if myHubController.headerHeightConstraint.constant > midPoint {
             UIView.animate(withDuration: 0.2, animations: {
-                self.myHubController.headerHeightConstraint.constant = self.minHeight
+                self.myHubController.headerHeightConstraint.constant = self.expandedLibraryHeaderHeight
                 self.myHubController.view.layoutIfNeeded()
             })
         } else {
             UIView.animate(withDuration: 0.2, animations: {
-                self.myHubController.headerHeightConstraint.constant = self.maxHeight
+                self.myHubController.headerHeightConstraint.constant = self.collapsedLibraryHeaderHeight
                 self.myHubController.view.layoutIfNeeded()
             })
         }

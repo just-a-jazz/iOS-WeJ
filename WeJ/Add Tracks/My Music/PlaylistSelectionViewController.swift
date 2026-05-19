@@ -57,10 +57,8 @@ class PlaylistSelectionViewController: UIViewController, SelectionCountBadgePres
     }
     
     private func adjustViews() {
-        titleLabel.text = musicService.toString()
-        if musicService == .spotify {
-            artistsStackView.isHidden = true
-        }
+        titleLabel.text = NSLocalizedString("My Library", comment: "")
+        artistsStackView.isHidden = false
         [albumsButton, artistsButton, playlistsButton, allSongsButton].forEach { button in
             button?.addTarget(self, action:#selector(highlightIcon(sender:)), for: .touchDown)
             button?.addTarget(self, action:#selector(unhighlightIcon(sender:)), for: [.touchUpInside, .touchUpOutside, .touchDragOutside])
