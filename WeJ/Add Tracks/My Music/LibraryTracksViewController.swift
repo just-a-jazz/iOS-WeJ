@@ -115,8 +115,10 @@ class LibraryTracksViewController: UIViewController, UITableViewDelegate, UITabl
     private func adjustTableView() {
         tracksTableView.contentInset = UIEdgeInsets(top: 0, left: 0, bottom: 50, right: 0)
         
-        tracksTableView.sectionIndexColor = .gray
+        tracksTableView.sectionIndexColor = .lightGray
         tracksTableView.sectionIndexBackgroundColor = .clear
+        tracksTableView.sectionIndexTrackingBackgroundColor = AppConstants.darkerBlack
+        tracksTableView.tintColor = AppConstants.orange
     }
     
     private func populateSpecificTracks() {
@@ -272,19 +274,19 @@ class LibraryTracksViewController: UIViewController, UITableViewDelegate, UITabl
     
     func tableView(_ tableView: UITableView, viewForHeaderInSection section: Int) -> UIView? {
         let view = UIView()
-        view.backgroundColor = AppConstants.darkerBlack
-        
-        let label = UILabel(frame: CGRect(x: 30, y: view.center.y + 13, width: 40, height: 15))
+        view.backgroundColor = .clear
+
+        let label = UILabel(frame: CGRect(x: 30, y: 13, width: 80, height: 15))
         label.text = orderedLibraryTracksDictKeys[section]
         label.font = UIFont(name: "AvenirNext-Bold", size: 20)
         label.textColor = .white
-        
+
         if UIDevice.deviceType == .iPhone4_4s || UIDevice.deviceType == .iPhone5_5s_SE {
             label.changeToSmallerFont()
         }
-        
+
         view.addSubview(label)
-        
+
         return view
     }
     

@@ -109,8 +109,10 @@ class PlaylistSubcategorySelectionViewController: UIViewController, UITableViewD
     private func customizeTableView() {
         edgesForExtendedLayout = UIRectEdge.init(rawValue: 0)
         
-        optionsTable.sectionIndexColor = .gray
+        optionsTable.sectionIndexColor = .lightGray
         optionsTable.sectionIndexBackgroundColor = .clear
+        optionsTable.sectionIndexTrackingBackgroundColor = AppConstants.darkerBlack
+        optionsTable.tintColor = AppConstants.orange
     }
     
     private func setOptions() {
@@ -212,15 +214,15 @@ class PlaylistSubcategorySelectionViewController: UIViewController, UITableViewD
     
     func tableView(_ tableView: UITableView, viewForHeaderInSection section: Int) -> UIView? {
         let view = UIView()
-        view.backgroundColor = AppConstants.darkerBlack
-        
-        let label = UILabel(frame: CGRect(x: 30, y: view.center.y + 13, width: 40, height: 15))
+        view.backgroundColor = .clear
+
+        let label = UILabel(frame: CGRect(x: 30, y: 13, width: 80, height: 15))
         label.text = orderedOptionsDictKeys[section]
         label.font = UIFont(name: "AvenirNext-Bold", size: 20)
         label.textColor = .white
-        
+
         view.addSubview(label)
-        
+
         return view
     }
     
