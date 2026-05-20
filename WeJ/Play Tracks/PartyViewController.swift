@@ -465,6 +465,7 @@ class PartyViewController: UIViewController, MusicPlayerDelegate, UpdatePartyDel
             let tracksReceived = tracksReceived.filter { !Party.tracksQueue(hasTrack: $0) }
             Party.tracksQueue.append(contentsOf: getCacheOptimizedTracks(fromTracks: tracksReceived))
             if Party.tracksQueue.count == tracksReceived.count {
+                lastObservedAppleMusicPosition = nil
                 musicPlayer.startPlayer()
                 lastQueueStartAt = Date.now
             }
@@ -559,12 +560,17 @@ class PartyViewController: UIViewController, MusicPlayerDelegate, UpdatePartyDel
         guard Party.musicService == .appleMusic else { return }
         let currentPosition = musicPlayer.currentPosition ?? -1
         let previousPosition = lastObservedAppleMusicPosition
+        let isWithinQueueStartGracePeriod = lastQueueStartAt.map { Date.now.timeIntervalSince($0) < 2.0 } ?? false
         if musicPlayer.appleMusicPlayer.playbackState == .paused,
            !Party.tracksQueue.isEmpty,
            let previousPosition = previousPosition,
            previousPosition > 1.0,
            currentPosition >= 0,
             currentPosition <= 0.1 {
+            if isWithinQueueStartGracePeriod {
+                lastObservedAppleMusicPosition = currentPosition
+                return
+            }
             let recentQueueAdvance = lastQueueAdvanceAt.map { Date.now.timeIntervalSince($0) < 1.0 } ?? false
             if !recentQueueAdvance {
                 skipTrack()
@@ -669,6 +675,7 @@ class PartyViewController: UIViewController, MusicPlayerDelegate, UpdatePartyDel
         Party.tracksQueue.append(contentsOf: tracks)
         
         if Party.tracksQueue.count == tracks.count && isHost {
+            lastObservedAppleMusicPosition = nil
             musicPlayer.startPlayer()
             lastQueueStartAt = Date.now
         }
