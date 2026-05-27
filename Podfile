@@ -7,7 +7,7 @@ target 'WeJ' do
 
   # Pods for WeJ
   pod 'RKNotificationHub'
-  pod 'SwiftyJSON'
+  pod 'SwiftyJSON', '5.0.2'
   pod 'NVActivityIndicatorView'
   pod 'Siren'
   pod 'M13Checkbox' 
